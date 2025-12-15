@@ -1,0 +1,10 @@
+# ==== BACKEND ENV ONLY ====
+backend/.env
+backend/.env.*
+backend/*.env
+
+# (optional) python cache backend
+backend/__pycache__/
+backend/**/*.pyc
+backend/.venv/
+backend/venv/
