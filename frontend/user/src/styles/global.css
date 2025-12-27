@@ -1,0 +1,58 @@
+header {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+}
+.item-courses {
+    display: block;
+    color: #4a5568; /* gray-700 */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.item-courses:hover {
+    display: block;
+    color: #ffffff; /* white */
+    background-color: #000000; /* black */
+}
+
+.bg-custom {
+  background: linear-gradient(to bottom, #4cacfb, #ffffff);
+  background-size: 100% 100%;
+}
+.roadmap-bg {
+  background: linear-gradient(to bottom, #FFCCCC, #ffffff);
+  background-size: 100% 100%;
+}
+
+.button-custom {
+  background: radial-gradient(
+    circle at center,
+    #FFCCCC 0%,
+    #FFCCCC 30%,
+    #ffffff 100%
+  );
+}
+.logo-bg {
+    position: absolute;
+    z-index: 1;
+}
+.bg-welcome {
+    background-image: url('../assets/bg_welcome.png');
+    background-size: cover;
+    background-position: center;
+}
+.bg-frontend {
+    background-image: url('../assets/bg_frontend.png');
+    background-size: cover;
+    background-position: center;
+}
+.bg-backend {
+    background-image: url('../assets/bg_backend.png');
+    background-size: cover;
+    background-position: center;
+}
+.bg-orther {
+    background-image: url('../assets/bg_orther.png');
+    background-size: cover;
+    background-position: center;
+}

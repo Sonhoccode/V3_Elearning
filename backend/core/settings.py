@@ -3,6 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -17,12 +18,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Third-party
     "corsheaders",
+    "rest_framework",
 
     # Local apps
     "apps.health",
+    # khoa hoc
+    "apps.courses.apps.CoursesConfig",
 ]
 
 MIDDLEWARE = [
@@ -38,6 +41,17 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "core.urls"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 600,
+    }
+}
 
 TEMPLATES = [
     {
@@ -57,22 +71,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+
+DATABASES = {
+    "default": dj_database_url.config(env="DATABASE_URL", conn_max_age=600)
+}
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Ho_Chi_Minh"
