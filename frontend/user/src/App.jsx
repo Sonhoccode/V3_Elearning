@@ -1,22 +1,44 @@
-import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/useAuth";
+
+import Login from "./router/login";
+import Register from "./router/register";
+import Student from "./pages/StudentPage";
+import Teacher from "./pages/TeacherPage";
+import Home from "./pages/HomePage";
+import OAuthCallback from "./router/OAuthCallback";
+import PrivateRoute from "./component/private_route";
 
 export default function App() {
-  const [data, setData] = useState(null);
-  const API = import.meta.env.VITE_API_BASE;
-
-  useEffect(() => {
-    fetch(`${API}/api/health/`)
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => setData({ ok: false }));
-  }, [API]);
-
   return (
-    <div className="min-h-screen p-6">
-      <h1 className="text-2xl font-semibold">User App</h1>
-      <pre className="mt-4 p-4 border rounded-lg bg-white">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    </div>
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register/>} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route path="/" element={<Home/>} />
+          {/* STUDENT */}
+          <Route
+            path="/StudentPage"
+            element={
+              <PrivateRoute roles={["student"]}>
+                <Student />
+              </PrivateRoute>
+            }
+          />
+
+          {/* TEACHER */}
+          <Route
+            path="/TeacherPage"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <Teacher />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }

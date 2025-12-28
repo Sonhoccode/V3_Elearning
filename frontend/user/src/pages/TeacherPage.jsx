@@ -2,7 +2,7 @@ import logo from "../assets/Logo TTTN/logo_full.png";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 
-function Home() {
+function Teacher() {
   const { isAuthenticated, user, logout_user } = useAuth();
 
   return (
@@ -119,4 +119,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Teacher;
