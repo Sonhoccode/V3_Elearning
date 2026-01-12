@@ -68,3 +68,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.username} ({self.role})"
+
+class Verification(models.Model):
+    us = models.ForeignKey(User, on_delete=models.CASCADE)
+    vc_otp = models.CharField(max_length=20)
+    vc_start = models.DateTimeField()
+    vc_end = models.DateTimeField()
+    vc_status = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "verification"
+
+    def __str__(self):
+        return f"OTP {self.vc_otp} - {self.us.username}"
