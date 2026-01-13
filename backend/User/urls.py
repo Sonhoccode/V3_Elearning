@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import auth, register, status, admin, github_oauth, get
+from .views import auth, register, status, admin, github_oauth, get, otp
 
 urlpatterns = [
     path('token/', auth.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -7,6 +7,7 @@ urlpatterns = [
     path('logout/', status.logout),
     path('authenticated/', status.is_authenticated),
     path('register/', register.register),
+    path('verify_otp/', otp.VerifyOTP, name='otp'),
     path('get/<str:id>/',get.get_user),
     path('admin/teachers/pending/',admin.pending_teachers),
     path('admin/teachers/approve/<int:user_id>/', admin.approve_teacher),

@@ -55,6 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     last_login = models.DateTimeField(blank=True, null=True)  # 🔥 QUAN TRỌNG
     created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
 
     objects = UserManager()
 

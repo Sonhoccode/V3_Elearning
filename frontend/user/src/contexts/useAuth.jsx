@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { is_authenticated, register, login, logout as apiLogout } from "../api/auth.api";
+import { is_authenticated, register, login, verify_otp, logout as apiLogout } from "../api/auth.api";
 
 const AuthContext = createContext();
 const STORAGE_KEY = "auth_user"; // 🔥 KEY LƯU STORAGE
@@ -83,27 +83,48 @@ const get_authenticated = async () => {
   };
 
   const register_user = async (
-    username,
-    email,
-    password,
-    cPassword,
-    role = "student"
-  ) => {
-    if (password !== cPassword) {
-      return { ok: false, error: "password not match" };
+  username,
+  email,
+  password,
+  cPassword,
+  role = "student"
+) => {
+  if (password !== cPassword) {
+    return { ok: false, error: "Password not match" };
+  }
+
+  try {
+    const res = await register(username, email, password, role);
+
+    // backend của bạn trả:
+    // { message, user_id } hoặc { registered: true }
+    if (res?.user_id || res?.registered) {
+      // ❌ KHÔNG redirect
+      return {
+        ok: true,
+        need_otp: true,   // 🔥 flag quan trọng
+        username,
+        email,
+      };
     }
 
-    try {
-      const res = await register(username, email, password, role);
-      if (res?.registered) {
-        navigator("/login");
-        return { ok: true };
-      }
-      return { ok: false, error: res?.error || "Register failed" };
-    } catch {
-      return { ok: false, error: "error register" };
-    }
-  };
+    return { ok: false, error: res?.error || "Register failed" };
+  } catch (e) {
+    return { ok: false, error: e.response?.data?.error || "Error register" };
+  }
+};
+
+const verify_otp = async (username, otp) => {
+  try {
+    await verify_otp(username, otp);
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e.response?.data?.error || "OTP không hợp lệ",
+    };
+  }
+};
 
   // 🚪 LOGOUT
   const logout_user = async () => {
@@ -127,6 +148,7 @@ const get_authenticated = async () => {
         loading,
         login_user,
         register_user,
+        verify_otp,
         logout_user,
       }}
     >
@@ -134,5 +156,7 @@ const get_authenticated = async () => {
     </AuthContext.Provider>
   );
 };
+
+
 
 export const useAuth = () => useContext(AuthContext);
