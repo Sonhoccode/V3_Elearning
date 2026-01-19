@@ -2,6 +2,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from ..models import Category, Course, Lesson, LessonTranslation
 from ..serializers import (
@@ -9,6 +10,7 @@ from ..serializers import (
     AdminLessonDetailSerializer, AdminLessonTranslationSerializer
 )
 from ..cache_utils import bump_menu_version
+from apps.Common.permissions import IsAdminRole
 
 # ========== ADMIN APIs - FULL CRUD ==========
 
@@ -27,7 +29,7 @@ class AdminLessonViewSet(ModelViewSet):
     queryset = Lesson.objects.all().order_by("order")
     serializer_class = AdminLessonDetailSerializer
     lookup_field = 'slug'
-    # permission_classes = [IsAdminUser]  # Uncomment khi có authentication
+    permission_classes = [IsAuthenticated, IsAdminRole]
     
     def create(self, request, *args, **kwargs):
         """
@@ -220,7 +222,7 @@ class AdminLessonViewSet(ModelViewSet):
 class AdminCourseList(ModelViewSet):
     serializer_class = AdminCoursesItem
     queryset = Course.objects.all()
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminRole]
     
     def get_serializer_class(self):
         # get all courses for admin
@@ -245,7 +247,7 @@ class AdminCourseList(ModelViewSet):
 class AdminCategoriesList(ModelViewSet):
     serializer_class = CategoriesItem
     queryset = Category.objects.all()
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated, IsAdminRole]
     
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
