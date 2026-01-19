@@ -99,7 +99,8 @@ def github_callback(request):
             username=username,
             email=primary_email or "",
             role="student",
-            password="",  # github login không dùng password nội bộ
+            password="",
+            is_verified=True,  
         )
     else:
         # update username/email nếu thiếu
@@ -130,4 +131,5 @@ def me(request):
         "username": u.username,
         "email": u.email,
         "role": getattr(u, "role", None),
+        "is_verified": getattr(u, "is_verified", True),
     })

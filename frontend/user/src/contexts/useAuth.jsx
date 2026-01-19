@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { is_authenticated, register, login, verify_otp, logout as apiLogout } from "../api/auth.api";
+import { is_authenticated, register, login, verifyOTP, logout as apiLogout } from "../api/auth.api";
 
 const AuthContext = createContext();
 const STORAGE_KEY = "auth_user"; // 🔥 KEY LƯU STORAGE
@@ -24,12 +24,21 @@ const get_authenticated = async () => {
     if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         console.log("✅ Auth from storage:", parsedUser);
-        setUser(JSON.parse(storedUser));
+        if (parsedUser.is_verified === true) {
+        setUser(parsedUser);
         setIsAuthenticated(true);
-        setLoading(false);
-        return;
+      } else {
+        // ❌ chưa verify → xoá localStorage
+        localStorage.removeItem(STORAGE_KEY);
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+
+      setLoading(false);
+      return;
     }
 
+    // 🔐 fallback: check cookie / token
     const ok = await is_authenticated();
 
     if (ok === true) {
@@ -39,7 +48,7 @@ const get_authenticated = async () => {
       setUser(null);
       localStorage.removeItem(STORAGE_KEY);
     }
-  } catch {
+  } catch (error) {
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
@@ -86,15 +95,14 @@ const get_authenticated = async () => {
   username,
   email,
   password,
-  cPassword,
-  role = "student"
+  cPassword
 ) => {
   if (password !== cPassword) {
     return { ok: false, error: "Password not match" };
   }
 
   try {
-    const res = await register(username, email, password, role);
+    const res = await register(username, email, password);
 
     // backend của bạn trả:
     // { message, user_id } hoặc { registered: true }
@@ -114,9 +122,9 @@ const get_authenticated = async () => {
   }
 };
 
-const verify_otp = async (username, otp) => {
+const verify_otp_user = async (username, otp) => {
   try {
-    await verify_otp(username, otp);
+    await verifyOTP(username, otp.trim());
     return { ok: true };
   } catch (e) {
     return {
@@ -125,6 +133,7 @@ const verify_otp = async (username, otp) => {
     };
   }
 };
+
 
   // 🚪 LOGOUT
   const logout_user = async () => {
@@ -148,8 +157,10 @@ const verify_otp = async (username, otp) => {
         loading,
         login_user,
         register_user,
-        verify_otp,
+        verify_otp_user,
         logout_user,
+        setUser,
+        setIsAuthenticated,
       }}
     >
       {children}

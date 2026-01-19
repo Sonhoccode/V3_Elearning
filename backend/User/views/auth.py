@@ -1,5 +1,4 @@
 from Common.models import User
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -13,19 +12,33 @@ from rest_framework_simplejwt.views import (
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        # ❗ LOGIN FAIL → TRẢ THẲNG, KHÔNG XỬ LÝ TIẾP
+        if response.status_code != 200:
+            return response
+
+        tokens = response.data
+
         try:
-            response = super().post(request, *args, **kwargs)
-            tokens = response.data
+            access = AccessToken(tokens["access"])
+            refresh_token = tokens["refresh"]
 
-            # 🔥 KHỞI TẠO ACCESS TOKEN NGAY TỪ ĐẦU
-            access = AccessToken(tokens['access'])
-            refresh_token = tokens['refresh']
-
-            user_id = access['user_id']
+            user_id = access["user_id"]
             user = User.objects.get(id=user_id)
 
-            # ❌ CHẶN TEACHER CHƯA DUYỆT
-            if user.role == 'teacher' and not user.is_approved:
+            # 🔐 CHẶN CHƯA VERIFY OTP
+            if not user.is_verified:
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Tài khoản chưa xác thực OTP"
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # 🔐 CHẶN TEACHER CHƯA DUYỆT
+            if user.role == "teacher" and not user.is_approved:
                 return Response(
                     {
                         "success": False,
@@ -34,10 +47,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-            # 🔥 GẮN ROLE + USERNAME VÀO JWT
-            access['role'] = user.role
-            access['username'] = user.username
-
+            # 🔥 GẮN CLAIM
+            access["role"] = user.role
+            access["username"] = user.username
             access_token = str(access)
 
             res = Response({
@@ -47,6 +59,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     "username": user.username,
                     "email": user.email,
                     "role": user.role,
+                    "is_verified": user.is_verified,
                 }
             })
 
@@ -54,9 +67,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 key="access_token",
                 value=access_token,
                 httponly=True,
-                secure=False,     # dev
-                samesite='None',
-                path='/'
+                secure=False,
+                samesite="None",
+                path="/"
             )
 
             res.set_cookie(
@@ -64,8 +77,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 value=refresh_token,
                 httponly=True,
                 secure=False,
-                samesite='None',
-                path='/'
+                samesite="None",
+                path="/"
             )
 
             return res
@@ -75,11 +88,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 {"success": False, "error": "User not found"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        except Exception as e:
-            return Response(
-                {"success": False, "error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+
 
 class CustomRefreshTokenView(TokenRefreshView):
     def post(self, request, *args, **kwargs):

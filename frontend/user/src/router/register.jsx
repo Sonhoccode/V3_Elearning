@@ -7,13 +7,12 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cPassword, setCPassword] = useState("");
-  const [role, setRole] = useState("student");
   const [step, setStep] = useState("register"); // register | otp
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
 
   const nav = useNavigate();
-  const { register_user, verify_otp } = useAuth();
+  const { register_user, verify_otp_user } = useAuth();
 
 const handleRegister = async () => {
   setError("");
@@ -23,7 +22,6 @@ const handleRegister = async () => {
     email,
     password,
     cPassword,
-    role
   );
 
   if (res?.ok === false) {
@@ -36,7 +34,7 @@ const handleRegister = async () => {
 const handleVerifyOtp = async () => {
   setError("");
   try {
-    await verify_otp(username, otp);
+    await verify_otp_user(username, otp);
     nav("/login");
   } catch (err) {
     setError(err.response?.data?.error || "OTP không hợp lệ");
@@ -92,27 +90,6 @@ const handleVerifyOtp = async () => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-
-          {/* Role */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Vai trò
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-            </select>
-
-            {role === "teacher" && (
-              <p className="text-xs text-yellow-600 mt-1">
-                * Tài khoản giáo viên cần admin duyệt
-              </p>
-            )}
           </div>
 
           {/* Password */}

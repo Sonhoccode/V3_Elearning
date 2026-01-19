@@ -7,6 +7,7 @@ urlpatterns = [
     path('logout/', status.logout),
     path('authenticated/', status.is_authenticated),
     path('register/', register.register),
+    path('register-teacher/', register.register_teacher),
     path('verify_otp/', otp.VerifyOTP, name='otp'),
     path('get/<str:id>/',get.get_user),
     path('admin/teachers/pending/',admin.pending_teachers),

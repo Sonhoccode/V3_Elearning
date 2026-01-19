@@ -62,16 +62,16 @@ export const is_authenticated = async () => {
   }
 };
 
-export const register = async (username, email, password, role = "student") => {
+export const register = async (username, email, password) => {
   const response = await axios.post(
     REGISTER_URL,
-    { username, email, password, role },
+    { username, email, password },
     { withCredentials: true }
   );
   return response.data;
 };
 
-export const verify_otp = async (username, otp) => {
+export const verifyOTP = async (username, otp) => {
   const response = await axios.post(
     OTP_URL,
     { username, otp },

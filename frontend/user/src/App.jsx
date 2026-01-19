@@ -9,15 +9,19 @@ import Home from "./pages/HomePage";
 import OAuthCallback from "./router/OAuthCallback";
 import PrivateRoute from "./component/private_route";
 
+// 🔥 IMPORT ĐÚNG
+import StudyPlanPage from "./pages/StudyPlanPage";
+
 export default function App() {
   return (
     <Router>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register/>} />
+          <Route path="/register" element={<Register />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
-          <Route path="/" element={<Home/>} />
+
           {/* STUDENT */}
           <Route
             path="/StudentPage"
@@ -28,12 +32,22 @@ export default function App() {
             }
           />
 
-          {/* TEACHER */}
+          {/* TEACHER DASHBOARD */}
           <Route
             path="/TeacherPage"
             element={
               <PrivateRoute roles={["teacher"]}>
                 <Teacher />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 🔥 STUDY PLAN – FIX MÀN TRẮNG */}
+          <Route
+            path="/teacher/study-plan"
+            element={
+              <PrivateRoute roles={["teacher"]}>
+                <StudyPlanPage />
               </PrivateRoute>
             }
           />

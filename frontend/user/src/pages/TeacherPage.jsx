@@ -98,6 +98,60 @@ function Teacher() {
         <p>This is where the main content will go.</p>
       </section>
 
+            {/* STUDY PLAN SECTION */}
+      <section className="bg-gray-100 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+
+          <h2 className="text-3xl font-bold text-center mb-4">
+            Study Plan for Teachers
+          </h2>
+
+          <p className="text-center text-gray-600 mb-10">
+            Create, organize and manage learning plans for your students.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-6">
+
+            {/* Card 1 */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <h3 className="font-semibold text-lg mb-2">
+                📅 Weekly Study Plan
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Drag & drop lessons into a weekly calendar.
+              </p>
+              <Link
+                to="/teacher/study-plan"
+                className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Open Study Plan
+              </Link>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <h3 className="font-semibold text-lg mb-2">
+                👩‍🎓 Student Progress
+              </h3>
+              <p className="text-sm text-gray-600">
+                Track learning progress of each student.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <h3 className="font-semibold text-lg mb-2">
+                🧠 Lesson Management
+              </h3>
+              <p className="text-sm text-gray-600">
+                Create and organize lessons by topic.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer className="bg-white p-3 text-center text-sm">
         footer

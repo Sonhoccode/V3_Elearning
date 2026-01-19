@@ -33,11 +33,10 @@ def VerifyOTP(request):
             return Response({"error": "OTP đã hết hạn"}, status=status.HTTP_400_BAD_REQUEST)
         
         verification.vc_status = True
-        verification.save()
+        verification.save(update_fields=['vc_status'])
 
-        if hasattr(user, 'is_verified'):
-            user.is_verified = True
-            user.save()
+        user.is_verified = True
+        user.save(update_fields=['is_verified'])
 
         return Response({"message": "Xác thực OTP thành công"}, status=status.HTTP_200_OK)
     except Exception as e:
