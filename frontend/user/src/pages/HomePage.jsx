@@ -7,6 +7,7 @@ import Card from "../components/items/CardItems.jsx";
 import logo from "../assets/logo_full.svg";
 import welcome from "../assets/welcome.svg";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const OFFSETS = [-3, -2, -1, 0, 1, 2, 3];
 function mod(n, m) {
@@ -17,6 +18,8 @@ export default function HomePage() {
   const [courses, setCourses] = useState([]);
   const [autoPlay, setAutoPlay] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const { t } = useTranslation("home");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -149,9 +152,12 @@ export default function HomePage() {
       }
     });
   };
+
+  
+  
   return (
     <div className="min-h-screen bg-custom flex flex-col items-center justify-center py-10 px-4">
-      <div className="w-full max-w-screen-2xl flex flex-col items-center gap-10">
+      <div className="w-full px-32 flex flex-col items-center gap-10">
         {/* main */}
         <div className="animate-fade-in relative w-full h-96 shadow-xl rounded-sm z-10 ">
           {/* welcome */}
@@ -164,11 +170,10 @@ export default function HomePage() {
               />
             </div>
             <h1 className=" text-4xl font-extrabold mb-4 text-slate-900">
-              Chào mừng đến với V3 E-learning
+              {t("bg-welcome.title_welcome")}
             </h1>
             <p className=" text-lg text-slate-700 px-2 w-fit mx-auto">
-              Hãy cùng chúng mình khám phá những khóa học thú vị và bổ ích về
-              lập trình nhé!
+              {t("bg-welcome.content_welcome")}
             </p>
             <NavLink
               to="/roadmap"
@@ -187,7 +192,7 @@ export default function HomePage() {
                 hover:scale-[1.05]
               "
             >
-              Xem lộ trình học
+              {t("bg-welcome.roadmap_title")}
             </NavLink>
           </div>
         </div>

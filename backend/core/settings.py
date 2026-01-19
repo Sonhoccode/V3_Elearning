@@ -18,14 +18,20 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
     # Third-party
     "corsheaders",
     "rest_framework",
+    "rest_framework_simplejwt",
 
     # Local apps
     "apps.health",
     # khoa hoc
     "apps.courses.apps.CoursesConfig",
+    # common
+    "apps.Common.apps.CommonConfig",
+    # User
+    "apps.User.apps.UserConfig",
 ]
 
 MIDDLEWARE = [
@@ -38,7 +44,19 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'apps.User.authentication.CookieJWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES':[
+        'rest_framework.permissions.IsAuthenticated'
+    ]
+
+}
 
 ROOT_URLCONF = "core.urls"
 
@@ -53,7 +71,7 @@ ROOT_URLCONF = "core.urls"
 #     }
 # }
 
-REDIS_URL = os.getenv("REDIS_URL", "").strip()
+REDIS_URL = os.getenv("REDIS_URL", "").strip()  
 
 if REDIS_URL:
     CACHES = {
@@ -113,4 +131,16 @@ ADMIN_FE_PORT = os.getenv("ADMIN_FE_PORT", "5174")
 CORS_ALLOWED_ORIGINS = [
     f"http://localhost:{USER_FE_PORT}",
     f"http://localhost:{ADMIN_FE_PORT}",
+    "http://localhost:5175",  # Admin backup port
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+AUTH_USER_MODEL = 'Common.User'
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')

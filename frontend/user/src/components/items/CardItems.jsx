@@ -1,9 +1,11 @@
 // frontend/user/src/components/items/CardItems.jsx
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 // import { fetchCourses } from "../../api/coursesAPI";
 // import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function Card({ title, description, slug, isActive, onClick }) {
+  const { t } = useTranslation("home");
   return (
     <button
       onClick={onClick}
@@ -33,7 +35,7 @@ export default function Card({ title, description, slug, isActive, onClick }) {
               : "bg-teal-50 border-teal-400",
           ].join(" ")}
         >
-          Bắt đầu ngay
+          {t("start_now")}
         </NavLink>
       </div>
     </button>

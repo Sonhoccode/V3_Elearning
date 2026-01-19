@@ -9,47 +9,40 @@ import { useState, useEffect } from "react";
 
 import { fetchCategories } from "../api/categoriesAPI";
 import { fetchCourses } from "../api/coursesAPI";
-import LoadingWords from "./items/LoadingWords.jsx";
+import DropLanguage from "./items/LanguageDrop.jsx";
+import AuthItems from "./items/AuthItems.jsx";
 
 export default function Header() {
   const [openSlug, setOpenSlug] = useState(null);
+  
   const qc = useQueryClient();
 
-  // luu cache courses
   const {
     data: courses = [],
     isLoading: coursesLoading,
     isError: coursesError,
-    error: errorCourses,
   } = useQuery({
     queryKey: ["courses"],
     queryFn: ({ signal }) => fetchCourses({ signal }),
     staleTime: 0,
-    gcTime: 0, // v5 (nếu v4 là cacheTime)
+    gcTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
-  // luu cache categories
+
   const {
     data: categories = [],
     isLoading: categoriesLoading,
     isError: categoriesError,
-    error: errorCategories,
   } = useQuery({
     queryKey: ["categories"],
     queryFn: ({ signal }) => fetchCategories({ signal }),
     staleTime: 0,
-    gcTime: 0, // v5 (nếu v4 là cacheTime)
+    gcTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
 
-  // mo / dong menu category
-  const toggle = (slug) => {
-    setOpenSlug((prev) => (prev === slug ? null : slug));
-  };
-
-  // prefetch courses khi categories load xong
   useEffect(() => {
     if (!categoriesLoading && !categoriesError) {
       qc.prefetchQuery({
@@ -60,7 +53,10 @@ export default function Header() {
     }
   }, [categoriesLoading, categoriesError, qc]);
 
-  // dong menu khi click ngoai
+  const toggle = (slug) => {
+    setOpenSlug((prev) => (prev === slug ? null : slug));
+  };
+
   useEffect(() => {
     const onDocClick = (e) => {
       if (!e.target.closest("[data-cat-menu]")) setOpenSlug(null);
@@ -71,29 +67,23 @@ export default function Header() {
 
   return (
     <header className="w-full flex flex-col items-center">
-      {/* Header Top */}
       <div className="w-full bg-white shadow-md">
         <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
           <NavLink to="/" className="h-full flex items-center mr-4">
             <img src={logo} alt="Logo" className="h-10 w-auto block" />
           </NavLink>
 
+          {/* drop menu categories */}
           <div className="flex items-center">
             {categoriesLoading && (
-              // <span className="text-gray-500 text-sm">
-              //   Đang tải danh sách danh mục...
-              // </span>
               <div className="flex items-center">
                 <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  {" "}
                   Language <ArrowDropDownIcon />
                 </span>
                 <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  {" "}
                   Framework <ArrowDropDownIcon />
                 </span>
                 <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  {" "}
                   Database <ArrowDropDownIcon />
                 </span>
               </div>
@@ -101,9 +91,10 @@ export default function Header() {
 
             {categoriesError && (
               <div className="text-red-500 text-sm">
-                Load failed: {errorCategories?.message || "Unknown error"}
+                <h1>Hệ thống đang gặp sự cố, vui lòng thử lại sau.</h1>
               </div>
             )}
+
             {!categoriesLoading &&
               !categoriesError &&
               categories.map((cat) => (
@@ -111,10 +102,9 @@ export default function Header() {
                   <button
                     onClick={() => toggle(cat.slug)}
                     type="button"
-                    className={`text-lg flex items-center gap-1 px-4 py-4 transition-all
-                    ${
+                    className={`text-lg flex items-center gap-1 px-4 py-4 transition-all ${
                       openSlug === cat.slug
-                        ? "text-gray-700 bg-[#FFCCCC] font-bold "
+                        ? "text-gray-700 bg-[#FFCCCC] font-bold"
                         : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
                     }`}
                   >
@@ -129,12 +119,12 @@ export default function Header() {
                   </button>
 
                   {openSlug === cat.slug && (
-                    <div className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
+                    <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
                       {cat.courses?.length ? (
                         cat.courses.map((item) => (
                           <NavLink
                             key={item.id}
-                            to={`/${cat.slug}/${item.slug}`}
+                            to={`/courses/${item.slug}`}
                             className="block px-3 py-2 hover:bg-gray-100 rounded"
                             onClick={() => setOpenSlug(null)}
                           >
@@ -144,10 +134,18 @@ export default function Header() {
                       ) : (
                         <div className="px-3 py-2 text-gray-500">No items</div>
                       )}
-                    </div>
+                    </aside>
                   )}
                 </div>
               ))}
+          </div>
+
+          {/* drop menu language */}
+          <DropLanguage />
+
+          {/* auth items */}
+          <div className="ml-4">
+            <AuthItems />
           </div>
         </div>
       </div>
@@ -156,14 +154,12 @@ export default function Header() {
       <div className="w-full h-14 bg-gray-100 ">
         {coursesLoading && (
           <div className="h-full flex items-center justify-center">
-            <LoadingWords text="Đợi chúng mình một chút nhé..." typeSpeed={90} pauseMs={800} />
+            <span className="loader"></span>
           </div>
         )}
-        {coursesError && (
-          <div className="text-red-500 text-sm">
-            Load failed: {errorCourses?.message || "Unknown error"}
-          </div>
-        )}
+
+        {coursesError && <div className="text-red-500 text-sm"></div>}
+
         {!coursesLoading && !coursesError && (
           <nav className="flex flex-wrap justify-center ">
             {courses?.length > 0 ? (
@@ -171,7 +167,13 @@ export default function Header() {
                 <NavLink
                   key={course.id}
                   to={`/courses/${course.slug}`}
-                  className="item-courses w-32 py-4 text-center font-semibold"
+                  className={({ isActive }) =>
+                    `item-courses w-32 py-4 text-center font-semibold transition-colors ${
+                      isActive
+                        ? "bg-[#FFCCCC] text-white"
+                        : "text-gray-700 hover:bg-gray-200"
+                    }`
+                  }
                 >
                   {course.title}
                 </NavLink>
@@ -180,7 +182,6 @@ export default function Header() {
               <div className="px-3 py-2 text-gray-500">No items</div>
             )}
           </nav>
-          
         )}
       </div>
     </header>

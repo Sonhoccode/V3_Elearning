@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 const FRONTEND = [
   {
@@ -63,6 +64,7 @@ const OTHER = [
 ];
 
 export default function RoadmapItem() {
+  const { t } = useTranslation("roadmap");
   // get roadmap frontend
   const roadmapFrontend = useMemo(() => {
     return FRONTEND.map((item) => (
@@ -105,11 +107,11 @@ export default function RoadmapItem() {
           transition-colors
         "
         >
-          Xem khóa học →
+          {t("view_course")} →
         </NavLink>
       </div>
     ));
-  }, []);
+  }, [t]);
 
   // get roadmap backend
   const roadmapBackend = useMemo(() => {
@@ -155,11 +157,11 @@ export default function RoadmapItem() {
           transition-colors
         "
         >
-          Xem khóa học →
+          {t("view_course")} →
         </NavLink>
       </div>
     ));
-  }, []);
+  }, [t]);
   const roadmapOther = useMemo(() => {
     return OTHER.map((item) => (
       <div
@@ -201,10 +203,10 @@ export default function RoadmapItem() {
           transition-colors
         "
         >
-          Xem khóa học →
+          {t("view_course")} →
         </NavLink>
       </div>
     ));
-  }, []);
+  }, [t]);
   return { roadmapFrontend, roadmapBackend, roadmapOther };
 }
