@@ -137,7 +137,7 @@ export default function LessonDetailView({ slug, onDeleteSuccess }) {
         <div className="p-8 bg-white min-h-[300px]">
             {currentTranslation.content ? (
                 <article 
-                    className="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-lg"
+                    className="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600"
                     dangerouslySetInnerHTML={{ __html: currentTranslation.content }} 
                 />
             ) : (

@@ -8,6 +8,6 @@
   "Register": "Đăng ký",
   "Login": "Đăng nhập",
   "Logout": "Đăng xuất",
-  "Profile": "Hồ sơ"
-  
+  "Profile": "Hồ sơ",
+  "error_system": "Hệ thống đang gặp sự cố, vui lòng thử lại sau."
 }

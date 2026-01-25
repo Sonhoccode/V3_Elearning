@@ -7,5 +7,6 @@
   "Hello": "Hello",
   "Register": "Register",
   "Login": "Login",
-  "Logout": "Logout"
+  "Logout": "Logout",
+  "error_system": "The system is experiencing issues, please try again later."
 }

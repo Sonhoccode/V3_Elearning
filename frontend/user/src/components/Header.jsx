@@ -11,9 +11,11 @@ import { fetchCategories } from "../api/categoriesAPI";
 import { fetchCourses } from "../api/coursesAPI";
 import DropLanguage from "./items/LanguageDrop.jsx";
 import AuthItems from "./items/AuthItems.jsx";
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
   const [openSlug, setOpenSlug] = useState(null);
+  const {t} = useTranslation("common");
   
   const qc = useQueryClient();
 
@@ -66,9 +68,9 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full flex flex-col items-center">
+    <header className="w-full flex flex-col">
       <div className="w-full bg-white shadow-md">
-        <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
+        <div className="header-top w-full sm:w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible px-3 sm:px-0">
           <NavLink to="/" className="h-full flex items-center mr-4">
             <img src={logo} alt="Logo" className="h-10 w-auto block" />
           </NavLink>
@@ -91,7 +93,7 @@ export default function Header() {
 
             {categoriesError && (
               <div className="text-red-500 text-sm">
-                <h1>Hệ thống đang gặp sự cố, vui lòng thử lại sau.</h1>
+                <h1>{t("error_system")}</h1>
               </div>
             )}
 
@@ -151,9 +153,9 @@ export default function Header() {
       </div>
 
       {/* Header Bottom */}
-      <div className="w-full h-14 bg-gray-100 ">
+      <div className="w-full bg-gray-100">
         {coursesLoading && (
-          <div className="h-full flex items-center justify-center">
+          <div className="h-14 flex items-center justify-center">
             <span className="loader"></span>
           </div>
         )}
@@ -161,21 +163,42 @@ export default function Header() {
         {coursesError && <div className="text-red-500 text-sm"></div>}
 
         {!coursesLoading && !coursesError && (
-          <nav className="flex flex-wrap justify-center ">
+          <nav
+            className="
+              h-14
+              flex flex-nowrap items-center
+              overflow-x-auto
+              justify-start sm:justify-center
+              scrollbar-hide
+              snap-x snap-mandatory
+              px-2 sm:px-4
+            "
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             {courses?.length > 0 ? (
               courses.map((course) => (
                 <NavLink
                   key={course.id}
                   to={`/courses/${course.slug}`}
-                  className={({ isActive }) =>
-                    `item-courses w-32 py-4 text-center font-semibold transition-colors ${
+                  className={({ isActive }) => `
+                    snap-start
+                    flex-shrink-0
+                    flex items-center justify-center
+                    text-center font-semibold
+                    transition-colors
+                    px-2 sm:px-3
+                    h-full leading-10
+                    w-[90px] sm:w-[120px] md:w-32
+                    text-sm sm:text-semibold
+                    ${
                       isActive
-                        ? "bg-[#FFCCCC] text-white"
-                        : "text-gray-700 hover:bg-gray-200"
-                    }`
-                  }
+                        ? "bg-[#FFCCCC] text-white border-white border-x-2"
+                        : "text-gray-700 hover:bg-[#FFCCCC] hover:text-white hover:border-white hover:border-x-2"
+                    }
+                  `}
+                  title={course.title}
                 >
-                  {course.title}
+                  <span className="block truncate">{course.title}</span>
                 </NavLink>
               ))
             ) : (

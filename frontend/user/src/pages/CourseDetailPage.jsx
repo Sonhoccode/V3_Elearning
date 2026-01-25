@@ -112,6 +112,19 @@ export default function CourseDetailPage() {
     }
   };
 
+  const formatLessonDate = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat(i18n.language, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    }).format(date);
+  };
+
+  const lessonCreatedAt = formatLessonDate(currentLesson?.created_at);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -165,6 +178,11 @@ export default function CourseDetailPage() {
             <h1 className="text-4xl font-bold mb-2">
                 {currentLesson?.translation?.title || course.title}
             </h1>
+            {lessonCreatedAt && (
+              <p className="text-white/80 text-sm">
+                {t("lesson.created_at")}: {lessonCreatedAt}
+              </p>
+            )}
           </div>
         </div>
 

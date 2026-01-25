@@ -146,6 +146,10 @@
   .prose li {
     @apply mb-2 pl-1;
   }
+/* 
+  .prose img {
+    @apply ;
+  } */
 
   /* W3Schools Example Box */
   .prose .example-box {
@@ -164,5 +168,4 @@
     @apply inline-block bg-[#04AA6D] text-white px-5 py-2 rounded text-base font-bold hover:bg-[#059862] transition shadow-sm no-underline;
   }
 }
-
 

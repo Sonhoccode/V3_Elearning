@@ -15,6 +15,19 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const data = await loginApi(email, password);
+          const role = data?.user?.role;
+          if (role !== "admin") {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            set({
+              error: "Admin access required",
+              isLoading: false,
+              isAuthenticated: false,
+              token: null,
+              user: null,
+            });
+            return false;
+          }
           // Assuming data contains { access: "...", refresh: "..." }
           const token = data.access;
           
@@ -30,7 +43,7 @@ export const useAuthStore = create(
             isAuthenticated: true, 
             isLoading: false,
             // You might want to set user info here if returned or decode token
-            user: { email }
+            user: data?.user || { email, role }
           });
           return true;
         } catch (error) {

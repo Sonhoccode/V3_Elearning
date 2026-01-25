@@ -18,11 +18,12 @@ from apps.Common.models import User
 def github_login(request):
     client_id = os.getenv("GITHUB_CLIENT_ID")
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    BASE_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/github/callback/"
 
-    # bạn có thể thêm state nếu muốn chống CSRF (nâng cao)
     params = {
         "client_id": client_id,
-        "redirect_uri": request.build_absolute_uri("/api/user/oauth/github/callback/"),
+        "redirect_uri": redirect_uri,
         "scope": "read:user user:email",
     }
 
