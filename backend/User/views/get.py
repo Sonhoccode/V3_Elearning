@@ -23,7 +23,7 @@ def get_user(request, id ):
     except Exception as e:
         return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-@api_view(['UPDATE'])
+@api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_user(request, id):
     try:
@@ -39,6 +39,7 @@ def update_user(request, id):
             "id": user.id,
             "username": user.username,
             "email": user.email,
+            "role": user.role
         }, status = status.HTTP_200_OK)
     
     except User.DoesNotExist:

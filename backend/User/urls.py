@@ -10,6 +10,7 @@ urlpatterns = [
     path('register-teacher/', register.register_teacher),
     path('verify_otp/', otp.VerifyOTP, name='otp'),
     path('get/<str:id>/',get.get_user),
+    path('update/<str:id>/',get.update_user),
     path('admin/teachers/pending/',admin.pending_teachers),
     path('admin/teachers/approve/<int:user_id>/', admin.approve_teacher),
     path("oauth/github/login/", github_oauth.github_login),
