@@ -22,3 +22,26 @@ def get_user(request, id ):
         return Response({"error": "User khong toon tai"}, status = status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['UPDATE'])
+@permission_classes([IsAuthenticated])
+def update_user(request, id):
+    try:
+        user = User.objects.get(id = id)
+
+        data = request.data
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+        user.role = data.get('role', user.role)
+        user.save()
+
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        }, status = status.HTTP_200_OK)
+    
+    except User.DoesNotExist:
+        return Response({"error": "User khong toon tai"}, status = status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
