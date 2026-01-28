@@ -2,72 +2,167 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-[var(--color-bg-primary)] text-[var(--color-text-primary)];
+  }
+}
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Colors - Light Theme (Bright & Simple) */
+  --color-bg-primary: #f8fafc; /* Slate 50 */
+  --color-bg-secondary: #ffffff; /* White */
+  --color-bg-tertiary: #f1f5f9; /* Slate 100 */
+  --color-bg-card: #ffffff;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Accent Colors */
+  --color-accent-primary: #14b8a6; /* Teal 500 */
+  --color-accent-secondary: #3b82f6; /* Blue 500 */
+  --color-accent-tertiary: #0ea5e9; /* Sky 500 */
+  --color-accent-gradient: linear-gradient(
+    135deg,
+    #14b8a6 0%,
+    #3b82f6 100%
+  );
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  --color-text-primary: #0f172a; /* Slate 900 */
+  --color-text-secondary: #64748b; /* Slate 500 */
+  --color-text-muted: #94a3b8; /* Slate 400 */
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  --color-border: #cbd5e1; /* Slate 300 - Darker for visible borders */
+  --color-border-hover: #94a3b8; /* Slate 400 */
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
+  /* Glassmorphism - Light */
+  --glass-bg: rgba(255, 255, 255, 0.95); /* More opaque for sturdy look */
+  --glass-border: var(--color-border); /* Solid border matching the theme */
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadows - Softer for light theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 15px rgba(20, 184, 166, 0.2);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer components {
+  /* Glass Card Utility */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
   }
-  a:hover {
-    color: #747bff;
+
+  /* Gradient Text Utility */
+  .gradient-text {
+    background: var(--color-accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  button {
-    background-color: #f9f9f9;
+
+  /* W3Schools-style overrides for Prose (Synced with User Side) */
+  .prose {
+    @apply max-w-none;
+  }
+  
+  .prose .lead {
+    @apply text-xl text-gray-600 mb-6 font-light leading-relaxed;
+  }
+
+  .prose .note {
+    @apply bg-yellow-50 border-l-4 border-yellow-400 p-4 my-6 text-gray-700 text-sm;
+  }
+  
+  .prose .note strong {
+    @apply font-bold text-gray-900 block mb-1;
+  }
+
+  .prose table {
+    @apply w-full text-left border-collapse my-6 border border-gray-200;
+  }
+
+  .prose th {
+    @apply border border-gray-200 bg-gray-100 p-3 font-semibold text-gray-700;
+  }
+
+  .prose td {
+    @apply border border-gray-200 p-3 text-gray-600;
+  }
+  
+  .prose tr:nth-child(even) {
+    @apply bg-gray-50;
+  }
+  
+  .prose pre {
+     @apply bg-[#282c34] text-gray-100 rounded-md p-4 overflow-x-auto my-6 text-sm leading-relaxed shadow-sm;
+  }
+  
+  .prose code {
+    @apply text-pink-500 font-mono bg-gray-100 px-1 py-0.5 rounded text-[0.9em];
+  }
+  
+  .prose pre code {
+    @apply bg-transparent text-inherit p-0 text-sm;
+  }
+  
+  .prose h1 {
+    @apply text-3xl font-bold text-gray-800 mb-6 pb-2 border-b border-gray-200;
+  }
+  
+  .prose h2 {
+    @apply text-2xl font-bold text-gray-800 mt-10 mb-4;
+  }
+
+  .prose ul {
+    @apply list-disc pl-6 my-4;
+  }
+  
+  .prose ol {
+    @apply list-decimal pl-6 my-4;
+  }
+  
+  .prose li {
+    @apply mb-2 pl-1;
+  }
+
+  /* W3Schools Example Box */
+  .prose .example-box {
+    @apply bg-[#E7E9EB] p-[20px] rounded-md my-6 shadow-sm;
+  }
+  
+  .prose .example-box h3 {
+    @apply text-xl font-normal text-gray-700 mb-2 mt-0 border-none;
+  }
+
+  .prose .example-box .code-box {
+    @apply bg-white p-4 border-l-4 border-teal-500 font-mono text-sm overflow-x-auto mb-4 text-black;
+  }
+  
+  .prose .example-box .btn-try {
+    @apply inline-block bg-[#04AA6D] text-white px-5 py-2 rounded text-base font-bold hover:bg-[#059862] transition shadow-sm no-underline;
   }
 }
+
+

@@ -11,6 +11,8 @@ import PrivateRoute from "./component/private_route";
 
 // 🔥 IMPORT ĐÚNG
 import StudyPlanPage from "./pages/StudyPlanPage";
+import QuizList from "./pages/Quiz/QuizList";
+import QuizDetail from "./pages/Quiz/QuizDetail";
 
 export default function App() {
   return (
@@ -48,6 +50,24 @@ export default function App() {
             element={
               <PrivateRoute roles={["teacher"]}>
                 <StudyPlanPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* QUIZ ROUTES */}
+          <Route
+            path="/quiz"
+            element={
+              <PrivateRoute roles={["student", "teacher", "admin"]}>
+                <QuizList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/quiz/:id"
+            element={
+              <PrivateRoute roles={["student", "teacher", "admin"]}>
+                <QuizDetail />
               </PrivateRoute>
             }
           />

@@ -82,3 +82,6 @@ class Verification(models.Model):
 
     def __str__(self):
         return f"OTP {self.vc_otp} - {self.us.username}"
+    
+    
+

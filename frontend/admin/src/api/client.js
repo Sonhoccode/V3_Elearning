@@ -16,7 +16,6 @@ const resolvedBaseURL = baseURL
 const api = axios.create({
   baseURL: resolvedBaseURL,
   timeout: 20000,
-  withCredentials: true, // 🔥 Quan trọng: gửi cookie kèm request
   headers: {
     "Content-Type": "application/json",
   },

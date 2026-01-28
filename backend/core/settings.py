@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     # Local apps
     "apps.health",
     "Common",
+    "Quiz",
 ]
 
 MIDDLEWARE = [
@@ -92,7 +93,7 @@ else:
         }
     }
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "vi"
 TIME_ZONE = "Asia/Ho_Chi_Minh"
 USE_I18N = True
 USE_TZ = True
