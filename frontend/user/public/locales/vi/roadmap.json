@@ -1,0 +1,17 @@
+{
+    "bg-frontend": {
+        "title": "Lộ Trình Học Frontend",
+        "description": "Lộ trình này giúp bạn xây dựng nền tảng vững chắc về phát triển giao diện người dùng, bắt đầu từ HTML, CSS cho đến JavaScript và React. Phù hợp cho người mới học cũng như những ai muốn hệ thống lại kiến thức frontend một cách bài bản."
+    },
+    "bg-backend": {
+        "title": "Lộ Trình Học Backend",
+        "description": "Lộ trình backend tập trung vào tư duy xử lý phía máy chủ, làm việc với cơ sở dữ liệu và xây dựng API cho ứng dụng web. Giúp bạn hiểu rõ cách hệ thống vận hành phía sau và kết nối với phần giao diện người dùng."
+    },
+    "bg-other": {
+        "title": "Một số khoá học khác",
+        "description": "Ngoài frontend và backend, chúng mình còn có những khoá học thú vị khác. Hãy khám phá để mở rộng kiến thức và kỹ năng của bạn trong các lĩnh vực mới mẻ!"    
+    },
+    "view_course": "Xem khoá học"
+    
+
+}

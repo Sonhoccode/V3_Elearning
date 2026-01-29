@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { is_authenticated, register, login, verifyOTP, logout as apiLogout } from "../api/auth.api";
+import { is_authenticated, get_me,update_me, register, login, verify_otp as apiVerifyOtp, logout as apiLogout } from "../api/auth.api";
 
 const AuthContext = createContext();
 const STORAGE_KEY = "auth_user"; // 🔥 KEY LƯU STORAGE
@@ -24,31 +24,29 @@ const get_authenticated = async () => {
     if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
         console.log("✅ Auth from storage:", parsedUser);
-        if (parsedUser.is_verified === true) {
-        setUser(parsedUser);
+        setUser(JSON.parse(storedUser));
         setIsAuthenticated(true);
-      } else {
-        // ❌ chưa verify → xoá localStorage
-        localStorage.removeItem(STORAGE_KEY);
-        setUser(null);
-        setIsAuthenticated(false);
-      }
-
-      setLoading(false);
-      return;
+        setLoading(false);
+        return;
     }
 
-    // 🔐 fallback: check cookie / token
     const ok = await is_authenticated();
 
     if (ok === true) {
+      const me = await get_me();   
+      setUser(me);
       setIsAuthenticated(true);
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(me)
+      );
     } else {
       setIsAuthenticated(false);
       setUser(null);
       localStorage.removeItem(STORAGE_KEY);
     }
-  } catch (error) {
+  } catch {
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
@@ -58,9 +56,9 @@ const get_authenticated = async () => {
 };
 
 
-  const login_user = async (username, password) => {
+  const login_user = async (email, password) => {
     try {
-      const data = await login(username, password);
+      const data = await login(email, password);
 
       if (data?.success) {
         setIsAuthenticated(true);
@@ -72,9 +70,11 @@ const get_authenticated = async () => {
         );
 
         const role = data.user?.role;
-        if (role === "teacher") navigator("/TeacherPage");
-        else if (role === "admin") navigator("/admin");
-        else navigator("/StudentPage"); // student
+        if (role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          navigator("/");
+        }
 
         return { ok: true };
       } else {
@@ -95,14 +95,15 @@ const get_authenticated = async () => {
   username,
   email,
   password,
-  cPassword
+  cPassword,
+  role = "student"
 ) => {
   if (password !== cPassword) {
     return { ok: false, error: "Password not match" };
   }
 
   try {
-    const res = await register(username, email, password);
+    const res = await register(username, email, password, role);
 
     // backend của bạn trả:
     // { message, user_id } hoặc { registered: true }
@@ -122,9 +123,9 @@ const get_authenticated = async () => {
   }
 };
 
-const verify_otp_user = async (username, otp) => {
+const verify_otp = async (email, otp) => {
   try {
-    await verifyOTP(username, otp.trim());
+    await apiVerifyOtp(email, otp);
     return { ok: true };
   } catch (e) {
     return {
@@ -133,7 +134,6 @@ const verify_otp_user = async (username, otp) => {
     };
   }
 };
-
 
   // 🚪 LOGOUT
   const logout_user = async () => {
@@ -144,6 +144,18 @@ const verify_otp_user = async (username, otp) => {
     console.log("❌ Logout: storage cleared"); 
     navigator("/login");
   };
+
+  const update_profile = async (payload) => {
+  const updatedUser = await update_me(payload);
+
+  setUser(updatedUser);
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(updatedUser)
+  );
+
+  return updatedUser;
+};
 
   useEffect(() => {
     get_authenticated();
@@ -157,10 +169,9 @@ const verify_otp_user = async (username, otp) => {
         loading,
         login_user,
         register_user,
-        verify_otp_user,
+        verify_otp,
         logout_user,
-        setUser,
-        setIsAuthenticated,
+        update_profile,
       }}
     >
       {children}

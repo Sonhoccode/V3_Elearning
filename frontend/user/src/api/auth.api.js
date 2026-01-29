@@ -1,16 +1,19 @@
-import axios from 'axios'
+import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE;
-const LOGIN_URL = `${BASE_URL}token/`;
-const REFRESH_URL = `${BASE_URL}token/refresh/`;
-const LOGOUT_URL = `${BASE_URL}logout/`;
-const AUTH_URL = `${BASE_URL}authenticated/`;
-const REGISTER_URL = `${BASE_URL}register/`;
-const OTP_URL = `${BASE_URL}verify_otp/`
+const BASE_URL = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
+const LOGIN_URL = `${BASE_URL}/api/user/token/`;
+const REFRESH_URL = `${BASE_URL}/api/user/token/refresh/`;
+const LOGOUT_URL = `${BASE_URL}/api/user/logout/`;
+const AUTH_URL = `${BASE_URL}/api/user/authenticated/`;
+const REGISTER_URL = `${BASE_URL}/api/user/register/`;
+const OTP_URL = `${BASE_URL}/api/user/verify_otp/`;
 // 🔥 OAuth Github
-const GITHUB_URL = `${BASE_URL}oauth/github/login/`;
+const GITHUB_URL = `${BASE_URL}/api/user/oauth/github/login/`;
 // 🔥 endpoint lấy user từ cookie (backend phải có /me/)
-const ME_URL = `${BASE_URL}me/`;
+const ME_URL = `${BASE_URL}/api/user/me/`;
+const UPDATE_ME_URL = `${BASE_URL}/api/user/me/update/`;
+
+
 
 export const github_login = () => {
   // chuyển trình duyệt sang backend để bắt đầu OAuth
@@ -22,10 +25,10 @@ export const get_me = async () => {
   return res.data; // {id, username, email, role}
 };
 
-export const login = async (username, password) => {
+export const login = async (email, password) => {
   const response = await axios.post(
     LOGIN_URL,
-    { username, password },
+    { email, password },
     { withCredentials: true }
   );
 
@@ -62,20 +65,29 @@ export const is_authenticated = async () => {
   }
 };
 
-export const register = async (username, email, password) => {
+export const register = async (username, email, password, role = "student") => {
   const response = await axios.post(
     REGISTER_URL,
-    { username, email, password },
+    { username, email, password, role },
     { withCredentials: true }
   );
   return response.data;
 };
 
-export const verifyOTP = async (username, otp) => {
+export const verify_otp = async (email, otp) => {
   const response = await axios.post(
     OTP_URL,
-    { username, otp },
+    { email, otp },
     { withCredentials: true }
   );
   return response.data;
+};
+
+export const update_me = async (payload) => {
+  const res = await axios.put(
+    UPDATE_ME_URL,
+    payload,
+    { withCredentials: true }
+  );
+  return res.data;
 };

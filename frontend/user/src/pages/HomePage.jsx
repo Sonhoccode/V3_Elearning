@@ -1,122 +1,245 @@
-import logo from "../assets/Logo TTTN/logo_full.png";
-import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/useAuth";
+import React from "react";
 
-function Home() {
-  const { isAuthenticated, user, logout_user } = useAuth();
+import { useState, useEffect, useMemo, useRef } from "react";
 
+import { fetchCourses } from "../api/coursesAPI";
+import Card from "../components/items/CardItems.jsx";
+import logo from "../assets/logo_full.svg";
+import welcome from "../assets/welcome.svg";
+import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
+const OFFSETS = [-3, -2, -1, 0, 1, 2, 3];
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
+
+export default function HomePage() {
+  const [courses, setCourses] = useState([]);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const { t } = useTranslation("home");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const data = await fetchCourses({ signal: controller.signal });
+        setCourses(Array.isArray(data) ? data : []);
+        setActiveIndex(0);
+      } catch (e) {
+        if (e.name === "AbortError") return;
+        console.error("Lỗi khi tải courses:", e);
+      }
+    })();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const LOCK_MS = 420;
+  const lockRef = useRef(false);
+  // lock đúng theo duration transition
+  const lock = () => {
+    lockRef.current = true;
+    window.setTimeout(() => {
+      lockRef.current = false;
+    }, LOCK_MS);
+  };
+
+  // di chuyển tới card theo delta
+  const go = (delta) => {
+    if (lockRef.current) return;
+    if (!courses.length) return;
+    lock();
+    setActiveIndex((prev) => mod(prev + delta, courses.length));
+  };
+
+  // di chuyển tới card kế tiếp và trước
+  const handleNext = () => go(1);
+  const handlePrev = () => go(-1);
+
+  // di chuyển tới card theo index
+  const handleSelect = (index) => {
+    if (lockRef.current) return;
+    lock();
+    setActiveIndex(index);
+  };
+
+  // AUTO LƯỚT (đừng chạy lúc đang lock)
+  useEffect(() => {
+    if (!autoPlay) return;
+    if (!courses.length) return;
+    const timer = setInterval(() => {
+      if (lockRef.current) return;
+      setActiveIndex((prev) => (prev + 1) % courses.length);
+    }, 1500);
+    return () => clearInterval(timer);
+  }, [autoPlay, courses.length]);
+
+  // tạo danh sách card hiển thị
+  const cards = useMemo(() => {
+    if (!courses.length) return [];
+    return OFFSETS.map((offset) => {
+      const index = mod(activeIndex + offset, courses.length);
+      const item = courses[index];
+      return {
+        offset,
+        index,
+        title: item?.title,
+        description: item?.description,
+        isActive: offset === 0,
+      };
+    });
+  }, [activeIndex, courses]);
+
+  // tính toán transform cho từng card
+  const offsetToTransform = (offset) => {
+    const x = offset * 230;
+    const scale =
+      offset === 0
+        ? 1.08
+        : Math.abs(offset) === 1
+        ? 0.95
+        : Math.abs(offset) === 2
+        ? 0.88
+        : 0.8;
+
+    const y = offset === 0 ? -10 : 0;
+
+    // quan trọng: offset = ±3 dùng làm buffer, ẩn đi nhưng vẫn tồn tại để trượt vào
+    const opacity =
+      offset === 0
+        ? 1
+        : Math.abs(offset) === 1
+        ? 0.82
+        : Math.abs(offset) === 2
+        ? 0.6
+        : 0;
+
+    const zIndex = 10 - Math.abs(offset);
+
+    return {
+      transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+      opacity,
+      zIndex,
+      pointerEvents: offset === 0 ? "auto" : "auto", // vẫn click được các card nhìn thấy
+    };
+  };
+
+  // throttle wheel banwfg rAF
+  const rafRef = useRef(null);
+  const wheelAccumRef = useRef(0);
+
+  const onWheel = (e) => {
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    wheelAccumRef.current += delta;
+
+    if (rafRef.current) return;
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = 0;
+      const v = wheelAccumRef.current;
+      wheelAccumRef.current = 0;
+
+      if (Math.abs(v) < 40) return; // ngưỡng
+
+      if (v > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    });
+  };
+
+  
+  
   return (
-    <div className="min-h-screen flex flex-col">
-
-      {/* HEADER */}
-      <header className="relative h-20 bg-white text-black flex items-center justify-between px-5">
-        {/* LEFT */}
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="Logo" className="w-10" />
-        </div>
-
-        {/* CENTER */}
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <h1 className="text-2xl font-semibold">
-            I am a{" "}
-            <span className="animated-text text-green-400 font-semibold" />
-          </h1>
-        </div>
-
-        {/* RIGHT */}
-        <div className="flex items-center gap-4 text-base">
-          {!isAuthenticated ? (
-            <>
-              <Link to="/register" className="hover:text-cyan-400">
-                Register
-              </Link>
-              <span className="text-gray-400">|</span>
-              <Link to="/login" className="hover:text-cyan-400">
-                Login
-              </Link>
-            </>
-          ) : (
-            <>
-              <span>
-                Xin chào, <b>{user?.username}</b>
-              </span>
-              <span className="text-gray-400">|</span>
-              <button
-                onClick={logout_user}
-                className="hover:text-red-500"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      </header>
-
-      {/* NAVBAR */}
-      <nav className="bg-[#222] py-1 flex justify-center">
-        <div className="flex gap-5 overflow-x-auto whitespace-nowrap px-4 scrollbar-hide">
-          {[
-            "HTML","CSS","JavaScript","SQL","Python","Java","PHP",
-            "How To","React","MySQL","NodeJS","Django"
-          ].map((item, i) => (
-            <a
-              key={i}
-              href="#"
-              className="text-gray-200 px-3 py-2 rounded-md text-sm hover:bg-[#333] hover:text-cyan-400 transition"
+    <div className="min-h-screen bg-custom flex flex-col items-center justify-center py-10 px-4">
+      <div className="w-full px-32 flex flex-col items-center gap-10">
+        {/* main */}
+        <div className="animate-fade-in relative w-full h-96 shadow-xl rounded-sm z-10 ">
+          {/* welcome */}
+          <div className="bg-welcome flex flex-col justify-center text-center absolute rounded-lg inset-0 z-30 ">
+            <div className="left-[10%] bottom-0 absolute z-20">
+              <img
+                src={welcome}
+                alt="Welcome Svg"
+                className=" w-auto h-80 ml-8"
+              />
+            </div>
+            <h1 className=" text-4xl font-extrabold mb-4 text-slate-900">
+              {t("bg-welcome.title_welcome")}
+            </h1>
+            <p className=" text-lg text-slate-700 px-2 w-fit mx-auto">
+              {t("bg-welcome.content_welcome")}
+            </p>
+            <NavLink
+              to="/roadmap"
+              className="
+                mx-auto mt-6
+                flex items-center justify-center
+                px-10 py-4
+                rounded-2xl
+                border border-white/30
+                button-custom bg-opacity-75
+                text-gray-700
+                font-semibold text-xl
+                shadow-lg
+                cursor-pointer
+                transition
+                hover:scale-[1.05]
+              "
             >
-              {item}
-            </a>
-          ))}
+              {t("bg-welcome.roadmap_title")}
+            </NavLink>
+          </div>
         </div>
-      </nav>
+        {/* logo */}
+        <div className="animate-fade-in logo-bg absolute right-0 top-[60%] -translate-y-1/2 ">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-full max-h-[980px] w-auto py-6"
+          />
+        </div>
 
-      {/* SECTION 1 */}
-      <section className="bg-[#222] text-white text-center py-20">
-        <h2 className="text-4xl font-bold mb-4">
-          Learn to code
-        </h2>
-        <p className="text-gray-300">
-          With the world's largest web developer site.
-        </p>
-      </section>
-
-      {/* WAVE */}
-      <div className="w-full bg-red-600 overflow-hidden leading-none">
-        <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="w-full h-24">
-          <path
-            fill="#222"
-            d="M0,256L48,229.3C96,203,192,149,288,144C384,139,480,181,576,192C672,203,768,181,864,170.7C960,160,1056,160,1152,149.3C1248,139,1344,117,1392,106.7L1440,96L1440,0L0,0Z"
-            />
-        </svg>
+        {/* Khung card */}
+        <div className="w-full max-w-8xl z-20 ">
+          <div className="h-[420px] flex items-center justify-center">
+            <div
+              className="relative w-full h-full flex items-center justify-center overflow-hidden"
+              onMouseEnter={() => setAutoPlay(false)}
+              onMouseLeave={() => setAutoPlay(true)}
+              onWheel={onWheel}
+            >
+              {cards.map(({ title, description, isActive, offset, index }) => (
+                <div
+                  key={index}
+                  // key={courses[index]?.id ?? index}
+                  // key={`${index}-${offset}`}
+                  style={offsetToTransform(offset)}
+                  className={[
+                    "absolute",
+                    "transition-[transform,opacity] duration-[800ms] ease-out",
+                    "will-change-transform",
+                    "select-none",
+                  ].join(" ")}
+                >
+                  <Card
+                    title={title}
+                    description={description}
+                    slug={courses[index]?.slug}
+                    isActive={isActive}
+                    onClick={() => handleSelect(index)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* SECTION 2 */}
-      <section className="bg-red-600 text-white text-center py-20">
-        <h2 className="text-3xl font-bold mb-3">
-          Content Area
-        </h2>
-        <p>This is where the main content will go.</p>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-white p-3 text-center text-sm">
-        footer
-      </footer>
-
-      {/* TEXT ANIMATION */}
-      <style>{`
-        .animated-text::after {
-          content: " Web Developer";
-          animation: words 6s infinite;
-        }
-        @keyframes words {
-          0%,33% { content: " Web Developer"; color: #00ff7f; }
-          34%,66% { content: " Creative Designer"; color: #ff00ff; }
-          67%,100% { content: " Digital Creator"; color: #ffd700; }
-        }
-      `}</style>
     </div>
   );
 }
-
-export default Home;
