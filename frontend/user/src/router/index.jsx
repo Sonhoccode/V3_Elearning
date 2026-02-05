@@ -10,6 +10,8 @@ import OAuthCallback from "../router/OAuthCallback";
 import { AuthProvider } from "../contexts/useAuth.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import ProfileUpdatePage from "../pages/ProfileUpdatePage.jsx";
+import TeacherPage from "../pages/TeacherPage.jsx";
+import StudyPlanPage from "../pages/StudyPlanPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +57,21 @@ const router = createBrowserRouter([
       },
     ],
   },
+      //Teacher routes
+  {
+    path: "teacher",
+    element: (
+      <AuthProvider>
+        <TeacherPage role={["teacher"]}/>
+      </AuthProvider>
+    ),
+    children: [
+      {
+        path: "study-plan",
+        element: <StudyPlanPage />,
+      },
+    ],
+  }  
 ]);
 
 export default router;

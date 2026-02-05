@@ -17,25 +17,14 @@ def register(request):
     username = request.data.get('username')
     email = request.data.get('email')
     password = request.data.get('password')
-    role = request.data.get('role', 'student')
 
-    ALLOWED_ROLES = ['student', 'teacher']
+    role = 'student'
 
-    # ===== Validate input =====
     if not username or not email or not password:
         return Response(
             {'registered': False, 'error': 'Thiếu dữ liệu'},
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    if not email.strip().lower().endswith("@gmail.com"):
-        return Response(
-            {'registered': False, 'error': 'Email phải là địa chỉ Gmail'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    if role not in ALLOWED_ROLES:
-        role = 'student'
 
     if User.objects.filter(username=username).exists():
         return Response(
@@ -49,12 +38,11 @@ def register(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # ===== Create user =====
     user = User.objects.create_user(
         username=username,
         email=email,
         password=password,
-        role=role
+        role=role  
     )
 
     # ===== Create OTP =====
@@ -92,5 +80,43 @@ def register(request):
 
     return Response({
         "message": "Đăng ký thành công! Vui lòng kiểm tra email để nhận mã OTP.",
+        "user_id": user.id
+    }, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_teacher(request):
+
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    if not username or not email or not password:
+        return Response(
+            {'registered': False, 'error': 'Thiếu dữ liệu'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if User.objects.filter(username=username).exists():
+        return Response(
+            {'registered': False, 'error': 'Username đã tồn tại'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {'registered': False, 'error': 'Email đã tồn tại'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        role='teacher'  # 🔒 CỐ ĐỊNH
+    )
+
+    return Response({
+        "message": "Đăng ký giáo viên thành công, chờ admin duyệt",
         "user_id": user.id
     }, status=status.HTTP_201_CREATED)

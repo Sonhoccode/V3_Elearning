@@ -1,25 +1,27 @@
 import logo from "../assets/Logo TTTN/logo_full.png";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
+import { Outlet } from "react-router-dom";
 
 function Teacher() {
   const { isAuthenticated, user, logout_user } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col">
-
+    
+    <div className="flex flex-col min-h-screen">
+         
       {/* HEADER */}
-      <header className="relative h-20 bg-white text-black flex items-center justify-between px-5">
+      <header className="relative flex items-center justify-between h-20 px-5 text-black bg-white">
         {/* LEFT */}
         <div className="flex items-center gap-2">
           <img src={logo} alt="Logo" className="w-10" />
         </div>
 
         {/* CENTER */}
-        <div className="absolute left-1/2 -translate-x-1/2">
+        <div className="absolute -translate-x-1/2 left-1/2">
           <h1 className="text-2xl font-semibold">
             I am a{" "}
-            <span className="animated-text text-green-400 font-semibold" />
+            <span className="font-semibold text-green-400 animated-text" />
           </h1>
         </div>
 
@@ -54,7 +56,7 @@ function Teacher() {
 
       {/* NAVBAR */}
       <nav className="bg-[#222] py-1 flex justify-center">
-        <div className="flex gap-5 overflow-x-auto whitespace-nowrap px-4 scrollbar-hide">
+        <div className="flex gap-5 px-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
           {[
             "HTML","CSS","JavaScript","SQL","Python","Java","PHP",
             "How To","React","MySQL","NodeJS","Django"
@@ -72,7 +74,7 @@ function Teacher() {
 
       {/* SECTION 1 */}
       <section className="bg-[#222] text-white text-center py-20">
-        <h2 className="text-4xl font-bold mb-4">
+        <h2 className="mb-4 text-4xl font-bold">
           Learn to code
         </h2>
         <p className="text-gray-300">
@@ -81,7 +83,7 @@ function Teacher() {
       </section>
 
       {/* WAVE */}
-      <div className="w-full bg-red-600 overflow-hidden leading-none">
+      <div className="w-full overflow-hidden leading-none bg-red-600">
         <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="w-full h-24">
           <path
             fill="#222"
@@ -91,46 +93,46 @@ function Teacher() {
       </div>
 
       {/* SECTION 2 */}
-      <section className="bg-red-600 text-white text-center py-20">
-        <h2 className="text-3xl font-bold mb-3">
+      <section className="py-20 text-center text-white bg-red-600">
+        <h2 className="mb-3 text-3xl font-bold">
           Content Area
         </h2>
         <p>This is where the main content will go.</p>
       </section>
 
             {/* STUDY PLAN SECTION */}
-      <section className="bg-gray-100 py-20">
-        <div className="max-w-6xl mx-auto px-6">
+      <section className="py-20 bg-gray-100">
+        <div className="max-w-6xl px-6 mx-auto">
 
-          <h2 className="text-3xl font-bold text-center mb-4">
+          <h2 className="mb-4 text-3xl font-bold text-center">
             Study Plan for Teachers
           </h2>
 
-          <p className="text-center text-gray-600 mb-10">
+          <p className="mb-10 text-center text-gray-600">
             Create, organize and manage learning plans for your students.
           </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
 
             {/* Card 1 */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="font-semibold text-lg mb-2">
+            <div className="p-6 bg-white shadow rounded-xl">
+              <h3 className="mb-2 text-lg font-semibold">
                 📅 Weekly Study Plan
               </h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="mb-4 text-sm text-gray-600">
                 Drag & drop lessons into a weekly calendar.
               </p>
               <Link
                 to="/teacher/study-plan"
-                className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                className="inline-block px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
               >
                 Open Study Plan
               </Link>
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="font-semibold text-lg mb-2">
+            <div className="p-6 bg-white shadow rounded-xl">
+              <h3 className="mb-2 text-lg font-semibold">
                 👩‍🎓 Student Progress
               </h3>
               <p className="text-sm text-gray-600">
@@ -139,8 +141,8 @@ function Teacher() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="font-semibold text-lg mb-2">
+            <div className="p-6 bg-white shadow rounded-xl">
+              <h3 className="mb-2 text-lg font-semibold">
                 🧠 Lesson Management
               </h3>
               <p className="text-sm text-gray-600">
@@ -152,8 +154,12 @@ function Teacher() {
         </div>
       </section>
 
+      <main className="flex-1">
+        <Outlet />
+      </main>
+
       {/* FOOTER */}
-      <footer className="bg-white p-3 text-center text-sm">
+      <footer className="p-3 text-sm text-center bg-white">
         footer
       </footer>
 

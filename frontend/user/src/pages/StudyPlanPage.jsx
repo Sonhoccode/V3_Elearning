@@ -9,8 +9,8 @@ import {
 } from "@dnd-kit/core";
 
 import TeacherLayout from "../layouts/TeacherLayout.jsx";
-import StudySidebar from "../component/study-plan/StudySidebar.jsx";
-import StudyCalendar from "../component/study-plan/StudyCalendar.jsx";
+import StudySidebar from "../components/study-plan/StudySidebar.jsx";
+import StudyCalendar from "../components/study-plan/StudyCalendar.jsx";
 import { TOPICS } from "../utils/studyPlanData.js";
 
 const initialPlan = {
