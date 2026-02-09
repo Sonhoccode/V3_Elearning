@@ -1,19 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 header {
     position: sticky;
     top: 0;
     z-index: 9999;
 }
-.item-courses {
+
+/* Ẩn thanh cuộn ngang cho toàn bộ trang */
+body {
+  overflow-x: hidden;
+}
+
+/* Ẩn thanh cuộn nhưng vẫn cho phép cuộn (dành cho Chrome, Safari, Edge) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ẩn cho Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* .item-courses {
     display: block;
-    color: #4a5568; /* gray-700 */
+    color: #4a5568; 
     transition: background-color 0.3s, color 0.3s;
 }
 
 .item-courses:hover {
     display: block;
-    color: #ffffff; /* white */
-    background-color: #000000; /* black */
-}
+    color: #ffffff; 
+    background-color: #000000; 
+} */
 
 .loader {
   width: 12px;
@@ -81,6 +102,12 @@ header {
 }
 .bg-orther {
     background-image: url('../assets/bg_orther.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-profile {
+    background-image: url('../assets/bg_profile.png');
     background-size: cover;
     background-position: center;
 }

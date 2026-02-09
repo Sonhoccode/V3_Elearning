@@ -8,7 +8,6 @@
         "no_lessons": "No lessons available.",
         "loading_lessons": "Loading lessons...",
         "not_found_course": "Course not found.",
-        "select_lesson_sidebar": "Select a lesson from the sidebar to start learning",
-        "created_at": "Created at"
+        "select_lesson_sidebar": "Select a lesson from the sidebar to start learning"
     }
 }

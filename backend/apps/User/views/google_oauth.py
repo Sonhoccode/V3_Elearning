@@ -15,76 +15,84 @@ from apps.Common.models import User
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def github_login(request):
-    client_id = os.getenv("GITHUB_CLIENT_ID")
+def google_login(request):
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     BASE_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/github/callback/"
+    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/google/callback/"
+
+    if not client_id:
+        return Response({"success": False, "error": "Missing GOOGLE_CLIENT_ID"}, status=500)
 
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
-        "scope": "read:user user:email",
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "consent",
     }
 
-    url = "https://github.com/login/oauth/authorize?" + urlencode(params)
+    url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
     return redirect(url)
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def github_callback(request):
+def google_callback(request):
     code = request.query_params.get("code")
     if not code:
         return Response({"success": False, "error": "Missing code"}, status=400)
 
-    client_id = os.getenv("GITHUB_CLIENT_ID")
-    client_secret = os.getenv("GITHUB_CLIENT_SECRET")
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    BASE_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/google/callback/"
+
+    if not client_id or not client_secret:
+        return Response({"success": False, "error": "Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET"}, status=500)
 
     # 1) exchange code -> access_token
     token_res = requests.post(
-        "https://github.com/login/oauth/access_token",
+        "https://oauth2.googleapis.com/token",
         headers={"Accept": "application/json"},
         data={
             "client_id": client_id,
             "client_secret": client_secret,
             "code": code,
+            "redirect_uri": redirect_uri,
+            "grant_type": "authorization_code",
         },
         timeout=20,
     ).json()
 
     access_token = token_res.get("access_token")
     if not access_token:
-        return Response({"success": False, "error": "Cannot get github access_token"}, status=401)
+        return Response(
+            {"success": False, "error": "Cannot get google access_token", "details": token_res},
+            status=401
+        )
 
-    # 2) get github user profile
+    # 2) get google user profile
     gh_user = requests.get(
-        "https://api.github.com/user",
+        "https://openidconnect.googleapis.com/v1/userinfo",
         headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"},
         timeout=20,
     ).json()
 
-    github_id = gh_user.get("id")
-    username = gh_user.get("login")
-    if not github_id or not username:
-        return Response({"success": False, "error": "Cannot read github user"}, status=401)
+    # Google OIDC userinfo trả về "sub" (user id), không phải "id"
+    google_id = gh_user.get("sub") or gh_user.get("id")
+    email = gh_user.get("email")
+    username = email or (f"google_{google_id}" if google_id else None)
+    if not google_id or not username:
+        return Response(
+            {"success": False, "error": "Cannot read google user", "details": gh_user},
+            status=401
+        )
 
-    # 3) get primary email (có thể null nếu user giấu email)
-    gh_emails = requests.get(
-        "https://api.github.com/user/emails",
-        headers={"Authorization": f"Bearer {access_token}", "Accept": "application/json"},
-        timeout=20,
-    ).json()
-
-    primary_email = None
-    if isinstance(gh_emails, list):
-        for e in gh_emails:
-            if e.get("primary") and e.get("verified"):
-                primary_email = e.get("email")
-                break
-        if not primary_email and len(gh_emails) > 0:
-            primary_email = gh_emails[0].get("email")
+    # 3) lấy email (google userinfo đã có email)
+    primary_email = email
 
     # 4) create/update user trong DB (ORM, không serializer)
     # bạn có thể chọn unique theo username hoặc email.
@@ -120,5 +128,3 @@ def github_callback(request):
     res.set_cookie("refresh_token", refresh_jwt, httponly=True, secure=False, samesite="Lax", path="/")
 
     return res
-
-

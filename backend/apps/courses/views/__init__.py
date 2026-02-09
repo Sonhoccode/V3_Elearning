@@ -4,7 +4,7 @@ from .helpers import (
 )
 from .public import (
     CategoriesList, CourseList, 
-    LessonsByCategoryList, LessonDetailViewSet
+    LessonsByCategoryList, LessonsByCourseList, LessonDetailViewSet
 )
 from .admin import (
     AdminLessonViewSet, AdminCourseList, AdminCategoriesList

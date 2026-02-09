@@ -5,61 +5,61 @@ import { useTranslation } from "react-i18next";
 const FRONTEND = [
   {
     name: "HTML",
-    courseLink: "/courses/html-basics",
+    courseLink: "/courses/html",
   },
   {
     name: "CSS",
-    courseLink: "/courses/css-basics",
+    courseLink: "/courses/css",
   },
   {
     name: "Tailwind",
-    courseLink: "/courses/tailwind-basics",
+    courseLink: "/courses/tailwind",
   },
   {
     name: "Javascript",
-    courseLink: "/courses/javascript-basics",
+    courseLink: "/courses/javascript",
   },
   {
     name: "React",
-    courseLink: "/courses/react-basics",
+    courseLink: "/courses/react",
   },
 ];
 
 const BACKEND = [
   {
     name: "Javascript",
-    courseLink: "/courses/javascript-basics",
+    courseLink: "/courses/javascript",
   },
   {
     name: "NodeJS",
-    courseLink: "/courses/nodejs-basics",
+    courseLink: "/courses/nodejs",
   },
   {
     name: "Python",
-    courseLink: "/courses/python-basics",
+    courseLink: "/courses/python",
   },
   {
     name: "Django",
-    courseLink: "/courses/django-basics",
+    courseLink: "/courses/django",
   },
   {
     name: "PHP",
-    courseLink: "/courses/php-basics",
+    courseLink: "/courses/php",
   },
 ];
 
 const OTHER = [
   {
     name: "C++",
-    courseLink: "/courses/cpp-basics",
+    courseLink: "/courses/cpp",
   },
   {
     name: "PostgreSQL",
-    courseLink: "/courses/postgresql-basics",
+    courseLink: "/courses/postgresql",
   },
   {
     name: "MongoDB",
-    courseLink: "/courses/mongodb-basics",
+    courseLink: "/courses/mongodb",
   },
 ];
 
@@ -67,9 +67,13 @@ export default function RoadmapItem() {
   const { t } = useTranslation("roadmap");
   // get roadmap frontend
   const roadmapFrontend = useMemo(() => {
-    return FRONTEND.map((item) => (
+    return FRONTEND.map((item, index) => (
       <div
         key={item.name}
+        data-aos="fade-right"
+        data-aos-duration="500"
+        data-aos-delay={index * 200}
+        data-aos-easing="ease-in-sine"
         className="
         group relative overflow-hidden
         mx-auto w-fit mb-4 px-8 py-3
@@ -115,9 +119,13 @@ export default function RoadmapItem() {
 
   // get roadmap backend
   const roadmapBackend = useMemo(() => {
-    return BACKEND.map((item) => (
+    return BACKEND.map((item, index) => (
       <div
         key={item.name}
+        data-aos="fade-left"
+        data-aos-duration="500"
+        data-aos-delay={index * 200}
+        data-aos-easing="ease-in-sine"
         className="
     group relative overflow-hidden
     w-fit mb-2 px-8 py-3

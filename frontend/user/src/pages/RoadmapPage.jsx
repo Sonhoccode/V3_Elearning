@@ -11,8 +11,21 @@ export default function RoadmapPage() {
       {/* Review roadmap frontend */}
       <div className="w-full max-w-screen-2xl flex flex-wrap justify-around items-center border-t-4 border-white shadow-lg mt-10 py-10 px-4 gap-10">
         <div className="flex flex-1 flex-col items-center justify-center ">
-          <h1 className="text-4xl font-bold mb-6">{t("bg-frontend.title")}</h1>
-          <p className="px-4 font-medium text-lg">
+          <h1
+            data-aos="fade-right"
+            data-aos-duration="500"
+            data-aos-easing="ease-in-sine"
+            className="text-4xl font-bold mb-6"
+          >
+            {t("bg-frontend.title")}
+          </h1>
+          <p
+            data-aos="zoom-in"
+            data-aos-duration="600"
+            data-aos-delay="300"
+            data-aos-easing="ease-in-sine"
+            className="px-4 font-medium text-lg"
+          >
             {t("bg-frontend.description")}
           </p>
         </div>
@@ -26,8 +39,21 @@ export default function RoadmapPage() {
           {roadmapBackend}
         </div>
         <div className="flex flex-1 flex-col items-center justify-center ">
-          <h1 className="text-4xl font-bold mb-6">{t("bg-backend.title")}</h1>
-          <p className="px-4 font-medium text-lg">
+          <h1
+            data-aos="fade-left"
+            data-aos-duration="500"
+            data-aos-easing="ease-in-sine"
+            className="text-4xl font-bold mb-6"
+          >
+            {t("bg-backend.title")}
+          </h1>
+          <p
+            data-aos="zoom-in"
+            data-aos-duration="600"
+            data-aos-delay="300"
+            data-aos-easing="ease-in-sine"
+            className="px-4 font-medium text-lg"
+          >
             {t("bg-backend.description")}
           </p>
         </div>
@@ -44,6 +70,5 @@ export default function RoadmapPage() {
         </div>
       </div>
     </div>
-
   );
 }

@@ -25,8 +25,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
 
-    # Local apps
-    "apps.health",
+
     # khoa hoc
     "apps.courses.apps.CoursesConfig",
     # common
@@ -50,8 +49,9 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'apps.User.authentication.CookieJWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        
     ),
     'DEFAULT_PERMISSION_CLASSES':[
         'rest_framework.permissions.IsAuthenticated'
@@ -76,7 +76,11 @@ ROOT_URLCONF = "core.urls"
 #     }
 # }
 
-REDIS_URL = os.getenv("REDIS_URL", "").strip()  
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    "redis://localhost:6379/1"
+).strip()
+
 
 if REDIS_URL:
     CACHES = {
@@ -149,7 +153,3 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-
-SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "lesson-img").strip()

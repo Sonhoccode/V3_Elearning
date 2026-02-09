@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { is_authenticated, register, login, verify_otp as apiVerifyOtp, logout as apiLogout } from "../api/auth.api";
+import { is_authenticated, get_me,update_me, register, login, verify_otp as apiVerifyOtp, logout as apiLogout } from "../api/auth.api";
 
 const AuthContext = createContext();
 const STORAGE_KEY = "auth_user"; // 🔥 KEY LƯU STORAGE
@@ -33,7 +33,14 @@ const get_authenticated = async () => {
     const ok = await is_authenticated();
 
     if (ok === true) {
+      const me = await get_me();   
+      setUser(me);
       setIsAuthenticated(true);
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(me)
+      );
     } else {
       setIsAuthenticated(false);
       setUser(null);
@@ -138,6 +145,18 @@ const verify_otp = async (email, otp) => {
     navigator("/login");
   };
 
+  const update_profile = async (payload) => {
+  const updatedUser = await update_me(payload);
+
+  setUser(updatedUser);
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(updatedUser)
+  );
+
+  return updatedUser;
+};
+
   useEffect(() => {
     get_authenticated();
   }, [location.pathname]);
@@ -152,6 +171,7 @@ const verify_otp = async (email, otp) => {
         register_user,
         verify_otp,
         logout_user,
+        update_profile,
       }}
     >
       {children}

@@ -1,99 +1,69 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import LessonSidebar from "../components/LessonSidebar";
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import { fetchCourses } from "../api/coursesAPI";
+import {
+  fetchLessonsByCourse,
+  fetchLessonDetail,
+} from "../api/lessonsAPI";
 
 export default function CourseDetailPage() {
   const { slug, lessonSlug } = useParams();
   const { i18n } = useTranslation();
   const navigate = useNavigate();
-  
-  const [course, setCourse] = useState(null);
-  const [lessons, setLessons] = useState([]);
-  const [currentLesson, setCurrentLesson] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [lessonLoading, setLessonLoading] = useState(false);
   const { t } = useTranslation("lesson");
 
-  // Load course and lessons
-  useEffect(() => {
-    if (!slug) return;
+  const {
+    data: courses = [],
+    isLoading: coursesLoading,
+    isError: coursesError,
+  } = useQuery({
+    queryKey: ["courses"],
+    queryFn: ({ signal }) => fetchCourses({ signal }),
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
-    const loadCourseAndLessons = async () => {
-      setLoading(true);
-      try {
-        // Get all courses to find this one
-        const coursesRes = await fetch(`${API_BASE}/api/v1/courses/`);
-        const coursesData = await coursesRes.json();
-        const foundCourse = coursesData.find((c) => c.slug === slug);
-        
-        if (!foundCourse) {
-          setCourse(null);
-          setLoading(false);
-          return;
-        }
-        
-        setCourse(foundCourse);
-        
-        // Get category to fetch lessons
-        const categoriesRes = await fetch(`${API_BASE}/api/v1/categories/`);
-        const categoriesData = await categoriesRes.json();
-        const category = categoriesData.find((cat) => 
-          cat.courses.some((c) => c.id === foundCourse.id)
-        );
-        
-        if (category) {
-          // Get lessons by category
-          const lessonsRes = await fetch(
-            `${API_BASE}/api/v1/categories/${category.slug}/lessons/?lang=${i18n.language}`
-          );
-          const lessonsData = await lessonsRes.json();
-          setLessons(lessonsData);
-          
-          // Auto-navigate to first lesson if no lesson selected
-          if (!lessonSlug && lessonsData.length > 0) {
-            navigate(`/courses/${slug}/lessons/${lessonsData[0].slug}`, {
-              replace: true,
-            });
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const course = useMemo(
+    () => courses.find((c) => c.slug === slug) || null,
+    [courses, slug]
+  );
 
-    loadCourseAndLessons();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, i18n.language, navigate]);
+  const {
+    data: lessons = [],
+    isLoading: lessonsLoading,
+  } = useQuery({
+    queryKey: ["lessons-by-course", slug, i18n.language],
+    queryFn: ({ signal }) =>
+      fetchLessonsByCourse({
+        courseSlug: slug,
+        lang: i18n.language,
+        signal,
+      }),
+    enabled: !!slug,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+  });
 
-  // Load lesson detail
-  useEffect(() => {
-    if (!lessonSlug) {
-      setCurrentLesson(null);
-      return;
-    }
-
-    const loadLesson = async () => {
-      setLessonLoading(true);
-      try {
-        const res = await fetch(
-          `${API_BASE}/api/v1/lessons/${lessonSlug}/?lang=${i18n.language}`
-        );
-        const data = await res.json();
-        setCurrentLesson(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLessonLoading(false);
-      }
-    };
-
-    loadLesson();
-  }, [lessonSlug, i18n.language]);
+  const {
+    data: currentLesson,
+    isLoading: lessonLoading,
+  } = useQuery({
+    queryKey: ["lesson-detail", lessonSlug, i18n.language],
+    queryFn: ({ signal }) =>
+      fetchLessonDetail({
+        lessonSlug,
+        lang: i18n.language,
+        signal,
+      }),
+    enabled: !!lessonSlug,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+  });
 
   // Navigation functions
   const currentIndex = lessons.findIndex((l) => l.slug === lessonSlug);
@@ -112,18 +82,7 @@ export default function CourseDetailPage() {
     }
   };
 
-  const formatLessonDate = (value) => {
-    if (!value) return "";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "";
-    return new Intl.DateTimeFormat(i18n.language, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-    }).format(date);
-  };
-
-  const lessonCreatedAt = formatLessonDate(currentLesson?.created_at);
+  const loading = coursesLoading || (slug && lessonsLoading);
 
   if (loading) {
     return (
@@ -136,7 +95,7 @@ export default function CourseDetailPage() {
     );
   }
 
-  if (!course) {
+  if (coursesError || !course) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
@@ -178,11 +137,6 @@ export default function CourseDetailPage() {
             <h1 className="text-4xl font-bold mb-2">
                 {currentLesson?.translation?.title || course.title}
             </h1>
-            {lessonCreatedAt && (
-              <p className="text-white/80 text-sm">
-                {t("lesson.created_at")}: {lessonCreatedAt}
-              </p>
-            )}
           </div>
         </div>
 

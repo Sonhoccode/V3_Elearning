@@ -4,21 +4,18 @@ import { NavLink } from "react-router-dom";
 import logo from "../assets/logo_full.svg";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
-import { fetchCategories } from "../api/categoriesAPI";
-import { fetchCourses } from "../api/coursesAPI";
+import { fetchCategories } from "../api/categoriesAPI.js";
+import { fetchCourses } from "../api/coursesAPI.js";
 import DropLanguage from "./items/LanguageDrop.jsx";
 import AuthItems from "./items/AuthItems.jsx";
-import { useTranslation } from "react-i18next";
 
 export default function Header() {
   const [openSlug, setOpenSlug] = useState(null);
-  const {t} = useTranslation("common");
   
-  const qc = useQueryClient();
-
+  // Lay danh mục và khóa học
   const {
     data: courses = [],
     isLoading: coursesLoading,
@@ -26,12 +23,13 @@ export default function Header() {
   } = useQuery({
     queryKey: ["courses"],
     queryFn: ({ signal }) => fetchCourses({ signal }),
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
+  // Lấy danh mục và khóa học theo danh mục
   const {
     data: categories = [],
     isLoading: categoriesLoading,
@@ -39,26 +37,18 @@ export default function Header() {
   } = useQuery({
     queryKey: ["categories"],
     queryFn: ({ signal }) => fetchCategories({ signal }),
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (!categoriesLoading && !categoriesError) {
-      qc.prefetchQuery({
-        queryKey: ["courses"],
-        queryFn: ({ signal }) => fetchCourses({ signal }),
-        staleTime: 360_000,
-      });
-    }
-  }, [categoriesLoading, categoriesError, qc]);
-
+  // Trang thái mở menu danh mục
   const toggle = (slug) => {
     setOpenSlug((prev) => (prev === slug ? null : slug));
   };
 
+  // Đóng menu khi click ra ngoài
   useEffect(() => {
     const onDocClick = (e) => {
       if (!e.target.closest("[data-cat-menu]")) setOpenSlug(null);
@@ -68,9 +58,9 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full flex flex-col">
+    <header className="w-full flex flex-col items-center">
       <div className="w-full bg-white shadow-md">
-        <div className="header-top w-full sm:w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible px-3 sm:px-0">
+        <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
           <NavLink to="/" className="h-full flex items-center mr-4">
             <img src={logo} alt="Logo" className="h-10 w-auto block" />
           </NavLink>
@@ -90,13 +80,14 @@ export default function Header() {
                 </span>
               </div>
             )}
-
+            {/* Error */}
             {categoriesError && (
               <div className="text-red-500 text-sm">
-                <h1>{t("error_system")}</h1>
+                <h1>Hệ thống đang gặp sự cố, vui lòng thử lại sau.</h1>
               </div>
             )}
 
+            {/* Thành công */}
             {!categoriesLoading &&
               !categoriesError &&
               categories.map((cat) => (
@@ -119,7 +110,8 @@ export default function Header() {
                       }
                     />
                   </button>
-
+                  
+                  {/* Drop menu */}
                   {openSlug === cat.slug && (
                     <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
                       {cat.courses?.length ? (
@@ -153,52 +145,31 @@ export default function Header() {
       </div>
 
       {/* Header Bottom */}
-      <div className="w-full bg-gray-100">
+      <div className="w-full h-14 bg-gray-100 ">
         {coursesLoading && (
-          <div className="h-14 flex items-center justify-center">
+          <div className="h-full flex items-center justify-center">
             <span className="loader"></span>
           </div>
         )}
 
-        {coursesError && <div className="text-red-500 text-sm"></div>}
+        {coursesError && <div className="text-red-500 text-sm">Hệ thống đang gặp sự cố, vui lòng thử lại sau.</div>}
 
         {!coursesLoading && !coursesError && (
-          <nav
-            className="
-              h-14
-              flex flex-nowrap items-center
-              overflow-x-auto
-              justify-start sm:justify-center
-              scrollbar-hide
-              snap-x snap-mandatory
-              px-2 sm:px-4
-            "
-            style={{ WebkitOverflowScrolling: "touch" }}
-          >
+          <nav className="flex flex-wrap justify-center ">
             {courses?.length > 0 ? (
               courses.map((course) => (
                 <NavLink
                   key={course.id}
                   to={`/courses/${course.slug}`}
-                  className={({ isActive }) => `
-                    snap-start
-                    flex-shrink-0
-                    flex items-center justify-center
-                    text-center font-semibold
-                    transition-colors
-                    px-2 sm:px-3
-                    h-full leading-10
-                    w-[90px] sm:w-[120px] md:w-32
-                    text-sm sm:text-semibold
-                    ${
+                  className={({ isActive }) =>
+                    `item-courses w-32 py-4 text-center font-semibold transition-colors ${
                       isActive
-                        ? "bg-[#FFCCCC] text-white border-white border-x-2"
-                        : "text-gray-700 hover:bg-[#FFCCCC] hover:text-white hover:border-white hover:border-x-2"
-                    }
-                  `}
-                  title={course.title}
+                        ? "bg-teal-500 text-white hover:bg-teal-400"
+                        : "text-gray-700 hover:bg-teal-500 hover:text-white "
+                    }`
+                  }
                 >
-                  <span className="block truncate">{course.title}</span>
+                  {course.title}
                 </NavLink>
               ))
             ) : (
