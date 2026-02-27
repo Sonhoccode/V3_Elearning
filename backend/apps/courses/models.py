@@ -7,6 +7,12 @@ STATUS_CHOICES = (
     ("published", "Published"),
 )
 
+# phân loại lesson: nhóm (group) hoặc bài học (lesson)
+LESSON_KIND_CHOICES = (
+    ("group", "Group"),
+    ("lesson", "Lesson"),
+)
+
 # danh mục khoá học
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -55,6 +61,11 @@ class Lesson(models.Model):
     )
 
     slug = models.SlugField()
+    kind = models.CharField(
+        max_length=10,
+        choices=LESSON_KIND_CHOICES,
+        default="lesson",
+    )
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 

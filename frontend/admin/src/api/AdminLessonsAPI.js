@@ -55,7 +55,7 @@ export async function fetchLessonDetail(slug) {
 
 /**
  * Tạo lesson mới
- * @param {Object} payload - Dữ liệu lesson {course, slug, order, parent}
+ * @param {Object} payload - Dữ liệu lesson {course, slug, order, parent, kind}
  * @returns {Promise} Lesson mới được tạo
  */
 export async function createLesson(payload) {
@@ -77,9 +77,9 @@ export async function createLesson(payload) {
 }
 
 /**
- * Cập nhật metadata của lesson (slug, order, course, parent)
+ * Cập nhật metadata của lesson (slug, order, course, parent, kind)
  * @param {string} slug - Slug của lesson
- * @param {Object} payload - Dữ liệu cần update {slug, order, course, parent}
+ * @param {Object} payload - Dữ liệu cần update {slug, order, course, parent, kind}
  * @returns {Promise} Lesson đã được update
  */
 export async function updateLessonMetadata(slug, payload) {

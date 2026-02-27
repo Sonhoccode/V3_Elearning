@@ -95,6 +95,7 @@ class LessonsByCategoryList(ReadOnlyModelViewSet):
                 "id": lesson.id,
                 "parent": lesson.parent_id,
                 "slug": lesson.slug,
+                "kind": lesson.kind,
                 "order": lesson.order,
                 "title": translation.title,
                 "short_description": translation.short_description,
@@ -153,6 +154,7 @@ class LessonsByCourseList(ReadOnlyModelViewSet):
                 "id": lesson.id,
                 "parent": lesson.parent_id,
                 "slug": lesson.slug,
+                "kind": lesson.kind,
                 "order": lesson.order,
                 "title": translation.title,
                 "short_description": translation.short_description,
@@ -203,6 +205,7 @@ class LessonDetailViewSet(ReadOnlyModelViewSet):
         
         data = {
             "slug": lesson.slug,
+            "kind": lesson.kind,
             "order": lesson.order,
             "lang": lang,
             "translation": {
