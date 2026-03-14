@@ -1,0 +1,14 @@
+{
+  "language": {
+    "language": "Ngôn ngữ",
+    "en": "Tiếng Anh",
+    "vi": "Tiếng Việt"
+  },
+  "Hello": "Xin chào",
+  "Register": "Đăng ký",
+  "Login": "Đăng nhập",
+  "Logout": "Đăng xuất",
+  "Profile": "Hồ sơ",
+  "Learn" : "Học"
+  
+}
