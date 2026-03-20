@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-header {
+.site-header {
     position: sticky;
     top: 0;
     z-index: 9999;
@@ -111,4 +111,3 @@ body {
     background-size: cover;
     background-position: center;
 }
-

@@ -10,6 +10,7 @@ import RegisterPage from "../pages/Auth/RegisterPage";
 import OAuthCallback from "../router/OAuthCallback";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import ProfileUpdatePage from "../pages/ProfileUpdatePage.jsx";
+import CodePlaygroundPage from "../pages/CodePlaygroundPage.jsx";
 
 import { AuthProvider } from "../contexts/useAuth.jsx";
 
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
       {
         path: "profile/update",
         element: <ProfileUpdatePage />,
+      },
+      {
+        path: "playground",
+        element: <CodePlaygroundPage />,
       },
     ],
   },

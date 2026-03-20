@@ -58,7 +58,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full flex flex-col items-center">
+    <header className="site-header w-full flex flex-col items-center">
       <div className="w-full bg-white shadow-md">
         <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
           <NavLink to="/" className="h-full flex items-center mr-4">
@@ -132,6 +132,39 @@ export default function Header() {
                   )}
                 </div>
               ))}
+
+            <div className="relative" data-cat-menu>
+              <button
+                onClick={() => toggle("more")}
+                type="button"
+                className={`text-lg flex items-center gap-1 px-4 py-4 transition-all ${
+                  openSlug === "more"
+                    ? "text-gray-700 bg-[#FFCCCC] font-bold"
+                    : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
+                }`}
+              >
+                More
+                <ArrowDropDownIcon
+                  className={
+                    openSlug === "more"
+                      ? "rotate-180 transition-transform"
+                      : "transition-transform"
+                  }
+                />
+              </button>
+
+              {openSlug === "more" && (
+                <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
+                  <NavLink
+                    to="/playground"
+                    className="block px-3 py-2 hover:bg-gray-100 rounded"
+                    onClick={() => setOpenSlug(null)}
+                  >
+                    Editor Code
+                  </NavLink>
+                </aside>
+              )}
+            </div>
           </div>
 
           {/* drop menu language */}
