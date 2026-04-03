@@ -156,6 +156,13 @@ export default function Header() {
               {openSlug === "more" && (
                 <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
                   <NavLink
+                    to="/classes"
+                    className="block px-3 py-2 hover:bg-gray-100 rounded"
+                    onClick={() => setOpenSlug(null)}
+                  >
+                    Lớp học
+                  </NavLink>
+                  <NavLink
                     to="/playground"
                     className="block px-3 py-2 hover:bg-gray-100 rounded"
                     onClick={() => setOpenSlug(null)}

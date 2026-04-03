@@ -28,6 +28,8 @@ INSTALLED_APPS = [
 
     # khoa hoc
     "apps.courses.apps.CoursesConfig",
+    # classes
+    "apps.classes.apps.ClassesConfig",
     # common
     "apps.Common.apps.CommonConfig",
     # User

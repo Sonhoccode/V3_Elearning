@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    last_login = models.DateTimeField(blank=True, null=True)  # 🔥 QUAN TRỌNG
+    last_login = models.DateTimeField(blank=True, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
 

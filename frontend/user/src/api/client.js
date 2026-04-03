@@ -3,10 +3,12 @@
 import axios from "axios";
 
 const baseURL =
-  (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BASE_URL || "").replace(
-    /\/$/,
+  (
+    import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_BASE ||
+    import.meta.env.VITE_BASE_URL ||
     ""
-  );
+  ).replace(/\/$/, "");
 
 // Nếu chưa set env thì fallback về localhost:8000
 const resolvedBaseURL = baseURL
@@ -19,6 +21,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Nếu sau này có JWT thì set token ở đây
