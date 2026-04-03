@@ -1,0 +1,14 @@
+asgiref==3.11.0
+Django==4.2.27
+django-cors-headers==4.9.0
+django-redis==5.4.0
+djangorestframework==3.16.1
+djangorestframework-simplejwt==5.5.1
+requests==2.32.3
+PyJWT==2.10.1
+python-dotenv==1.2.1
+redis==5.0.8
+sqlparse==0.5.4
+tzdata==2025.3
+psycopg2-binary==2.9.9
+dj-database-url==2.1.0

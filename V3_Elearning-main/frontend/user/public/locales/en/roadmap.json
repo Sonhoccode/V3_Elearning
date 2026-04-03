@@ -1,0 +1,16 @@
+{
+    "bg-frontend": {
+        "title": "Frontend Learning Roadmap",
+        "description": "This roadmap helps you build a solid foundation in user interface development, starting from HTML and CSS to JavaScript and React. It is suitable for beginners as well as those who want to systematically review frontend knowledge."
+    },
+    "bg-backend": {
+        "title": "Backend Learning Roadmap",
+        "description": "The backend roadmap focuses on server-side thinking, working with databases, and building APIs for web applications. It helps you understand how systems operate behind the scenes and connect with the user interface."
+    },
+    "bg-other": {
+        "title": "Other Courses",
+        "description": "In addition to frontend and backend, we also offer other exciting courses. Explore them to expand your knowledge and skills in new and emerging fields!"
+    },
+    "view_course": "View Course"
+
+}

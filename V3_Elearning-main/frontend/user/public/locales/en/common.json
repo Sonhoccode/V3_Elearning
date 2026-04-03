@@ -1,0 +1,12 @@
+{
+  "language": {
+    "language": "Language",
+    "en": "English",
+    "vi": "Vietnamese"
+  },
+  "Hello": "Hello",
+  "Register": "Register",
+  "Login": "Login",
+  "Logout": "Logout",
+  "Learn" : "Learn"
+}
