@@ -3,6 +3,18 @@
 from django.db import migrations, models
 
 
+def set_lesson_kind(apps, schema_editor):
+    Lesson = apps.get_model("courses", "Lesson")
+    # Mark lessons that have children as groups
+    group_ids = list(
+        Lesson.objects
+        .filter(children__isnull=False)
+        .values_list("id", flat=True)
+        .distinct()
+    )
+    Lesson.objects.filter(id__in=group_ids).update(kind="group")
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,5 +27,5 @@ class Migration(migrations.Migration):
             name="kind",
             field=models.CharField(choices=[("group", "Group"), ("lesson", "Lesson")], default="lesson", max_length=10),
         ),
+        migrations.RunPython(set_lesson_kind, migrations.RunPython.noop),
     ]
-

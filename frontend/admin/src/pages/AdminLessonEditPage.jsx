@@ -63,6 +63,7 @@ export default function AdminLessonEditPage() {
         slug: res.slug,
         order: res.order,
         parent: res.parent || "",
+        kind: res.kind || "lesson",
         course: res.course,
         kind: res.kind || "lesson",
       });
@@ -313,6 +314,17 @@ export default function AdminLessonEditPage() {
                 value={metadataForm.slug}
                 onChange={(e) => setMetadataForm(prev => ({...prev, slug: e.target.value}))}
             />
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Loại bài học</label>
+                <select
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-[var(--color-border)]"
+                    value={metadataForm.kind || "lesson"}
+                    onChange={(e) => setMetadataForm(prev => ({...prev, kind: e.target.value}))}
+                >
+                    <option value="lesson">Bài học (Lesson)</option>
+                    <option value="group">Nhóm (Group)</option>
+                </select>
+            </div>
             <Input
                 label="Thứ tự (Order)"
                 type="number"

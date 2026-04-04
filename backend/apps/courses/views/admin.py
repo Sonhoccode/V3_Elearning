@@ -67,6 +67,12 @@ class AdminLessonViewSet(ModelViewSet):
                 {"detail": "course và slug là bắt buộc"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        if kind not in ["lesson", "group"]:
+            return Response(
+                {"detail": "kind phải là 'lesson' hoặc 'group'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         
         # Kiểm tra course tồn tại
         try:
@@ -111,7 +117,7 @@ class AdminLessonViewSet(ModelViewSet):
     def update_metadata(self, request, slug=None):
         """
         PATCH: Cập nhật metadata của lesson (slug, order, course, parent)
-        Body: {"slug": "...", "order": 0, "course": <id>, "parent": <id>}
+        Body: {"slug": "...", "order": 0, "course": <id>, "parent": <id>, "kind": "lesson"|"group"}
         """
         try:
             lesson = self.get_object()
@@ -152,8 +158,16 @@ class AdminLessonViewSet(ModelViewSet):
                 return Response(
                     {"detail": "Course not found"},
                     status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        if new_kind is not None:
+            if new_kind not in ["lesson", "group"]:
+                return Response(
+                    {"detail": "kind phải là 'lesson' hoặc 'group'"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-        
+            lesson.kind = new_kind
+
         if "parent" in request.data:
             new_parent_id = request.data["parent"]
             if new_parent_id in [None, ""]:

@@ -8,6 +8,12 @@ STATUS_CHOICES = (
     ("published", "Published"),
 )
 
+# phân loại lesson: nhóm (group) hoặc bài học (lesson)
+LESSON_KIND_CHOICES = (
+    ("group", "Group"),
+    ("lesson", "Lesson"),
+)
+
 # danh mục khoá học
 class Category(models.Model):
     name = models.CharField(max_length=100)

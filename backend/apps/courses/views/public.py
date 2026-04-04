@@ -205,6 +205,7 @@ class LessonDetailViewSet(ReadOnlyModelViewSet):
         
         data = {
             "slug": lesson.slug,
+            "kind": lesson.kind,
             "order": lesson.order,
             "kind": lesson.kind,
             "lang": lang,
