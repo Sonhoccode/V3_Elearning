@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { FaArrowLeft } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const ProfileUpdatePage = () => {
   const { user, update_profile } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation("auth");
 
   const [username, setUsername] = useState(user?.username || "");
   const [email] = useState(user?.email || "");
@@ -22,7 +24,8 @@ const ProfileUpdatePage = () => {
       await update_profile({ username });
       navigate("/profile");
     } catch (err) {
-      setError("Cập nhật thất bại");
+      console.error(err);
+      setError(t("profile.update_failed", "Cập nhật thất bại"));
     } finally {
       setLoading(false);
     }
@@ -38,10 +41,10 @@ const ProfileUpdatePage = () => {
         <div className="mb-8 flex items-start justify-between border-b pb-4">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
-              Update Profile
+              {t("profile.update_title", "Update Profile")}
             </h1>
             <p className="text-sm text-gray-500">
-              Cập nhật thông tin cá nhân của bạn
+              {t("profile.update_desc", "Cập nhật thông tin cá nhân của bạn")}
             </p>
           </div>
 
@@ -52,7 +55,7 @@ const ProfileUpdatePage = () => {
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-pink-600 transition"
           >
             <FaArrowLeft />
-            Quay lại
+            {t("profile.back", "Quay lại")}
           </button>
         </div>
 
@@ -68,13 +71,13 @@ const ProfileUpdatePage = () => {
           {/* Basic Info */}
           <section>
             <h2 className="mb-4 text-lg font-semibold text-gray-800">
-              Basic Information
+              {t("profile.basic_info", "Basic Information")}
             </h2>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
-                  Username
+                  {t("profile.username", "Username")}
                 </label>
                 <input
                   value={username}
@@ -87,7 +90,7 @@ const ProfileUpdatePage = () => {
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
-                  Email
+                  {t("profile.email", "Email")}
                 </label>
                 <input
                   value={email}
@@ -102,12 +105,12 @@ const ProfileUpdatePage = () => {
           {/* Security */}
           <section>
             <h2 className="mb-4 text-lg font-semibold text-gray-800">
-              Security
+              {t("profile.security", "Security")}
             </h2>
 
             <div>
               <label className="block text-sm text-gray-600 mb-1">
-                New Password
+                {t("profile.new_password", "New Password")}
               </label>
               <input
                 type="password"
@@ -119,7 +122,7 @@ const ProfileUpdatePage = () => {
                            focus:border-pink-400"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Đổi mật khẩu sẽ được xử lý ở bước tiếp theo
+                {t("profile.password_note", "Đổi mật khẩu sẽ được xử lý ở bước tiếp theo")}
               </p>
             </div>
           </section>
@@ -135,7 +138,7 @@ const ProfileUpdatePage = () => {
                        hover:bg-pink-600 disabled:opacity-50
                        disabled:cursor-not-allowed"
           >
-            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+            {loading ? t("profile.saving", "Đang lưu...") : t("profile.save_changes", "Lưu thay đổi")}
           </button>
         </div>
       </form>

@@ -182,7 +182,7 @@ const Register = () => {
               disabled={otp.length !== 6}
               className="w-full py-2 text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
             >
-              {"Xác nhận OTP"}
+              {t("register.confirm_otp") || "Xác nhận OTP"}
             </button>
 
             <button

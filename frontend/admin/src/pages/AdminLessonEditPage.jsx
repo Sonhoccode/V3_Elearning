@@ -28,6 +28,7 @@ export default function AdminLessonEditPage() {
     slug: "",
     order: 0,
     parent: "",
+    kind: "lesson",
   });
 
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,7 @@ export default function AdminLessonEditPage() {
         order: res.order,
         parent: res.parent || "",
         course: res.course,
+        kind: res.kind || "lesson",
       });
 
       // Fetch all lessons to populate Parent Options
@@ -317,6 +319,18 @@ export default function AdminLessonEditPage() {
                 value={metadataForm.order}
                 onChange={(e) => setMetadataForm(prev => ({...prev, order: parseInt(e.target.value)}))}
             />
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Loại bài</label>
+                <select
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-[var(--color-border)]"
+                    value={metadataForm.kind || "lesson"}
+                    onChange={(e) => setMetadataForm(prev => ({...prev, kind: e.target.value}))}
+                >
+                    <option value="lesson">Lesson</option>
+                    <option value="group">Group</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Group dùng để gom nhóm, Lesson là bài học thực.</p>
+            </div>
              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bài học cha (Parent)</label>
                 <select

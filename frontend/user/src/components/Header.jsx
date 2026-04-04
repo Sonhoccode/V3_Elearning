@@ -9,10 +9,12 @@ import { useState, useEffect } from "react";
 
 import { fetchCategories } from "../api/categoriesAPI.js";
 import { fetchCourses } from "../api/coursesAPI.js";
+import { useTranslation } from "react-i18next";
 import DropLanguage from "./items/LanguageDrop.jsx";
 import AuthItems from "./items/AuthItems.jsx";
 
 export default function Header() {
+  const { t } = useTranslation("common");
   const [openSlug, setOpenSlug] = useState(null);
   
   // Lay danh mục và khóa học
@@ -83,7 +85,7 @@ export default function Header() {
             {/* Error */}
             {categoriesError && (
               <div className="text-red-500 text-sm">
-                <h1>Hệ thống đang gặp sự cố, vui lòng thử lại sau.</h1>
+                <h1>{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</h1>
               </div>
             )}
 
@@ -143,7 +145,7 @@ export default function Header() {
                     : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
                 }`}
               >
-                More
+                {t("header.more", "Thêm")}
                 <ArrowDropDownIcon
                   className={
                     openSlug === "more"
@@ -160,14 +162,14 @@ export default function Header() {
                     className="block px-3 py-2 hover:bg-gray-100 rounded"
                     onClick={() => setOpenSlug(null)}
                   >
-                    Lớp học
+                    {t("header.classes", "Lớp học")}
                   </NavLink>
                   <NavLink
                     to="/playground"
                     className="block px-3 py-2 hover:bg-gray-100 rounded"
                     onClick={() => setOpenSlug(null)}
                   >
-                    Editor Code
+                    {t("header.editor_code", "Editor Code")}
                   </NavLink>
                 </aside>
               )}
@@ -192,7 +194,7 @@ export default function Header() {
           </div>
         )}
 
-        {coursesError && <div className="text-red-500 text-sm">Hệ thống đang gặp sự cố, vui lòng thử lại sau.</div>}
+        {coursesError && <div className="text-red-500 text-sm">{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</div>}
 
         {!coursesLoading && !coursesError && (
           <nav className="flex flex-wrap justify-center ">

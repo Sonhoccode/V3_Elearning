@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function QuizAssignmentForm({ assignment, onSubmit, submitting }) {
   const questions = useMemo(() => {
@@ -10,6 +11,7 @@ export default function QuizAssignmentForm({ assignment, onSubmit, submitting })
   }, [assignment]);
 
   const [answers, setAnswers] = useState({});
+  const { t } = useTranslation("classes");
 
   useEffect(() => {
     setAnswers({});
@@ -30,7 +32,7 @@ export default function QuizAssignmentForm({ assignment, onSubmit, submitting })
   if (!questions.length) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-        Chưa có dữ liệu câu hỏi cho bài quiz này.
+        {t("status.no_questions", "Chưa có dữ liệu câu hỏi cho bài quiz này.")}
       </div>
     );
   }
@@ -45,14 +47,14 @@ export default function QuizAssignmentForm({ assignment, onSubmit, submitting })
           disabled={submitting}
           className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
         >
-          {submitting ? "Đang nộp..." : "Nộp bài"}
+          {submitting ? t("buttons.submitting") : t("buttons.submit")}
         </button>
       </div>
 
       <div className="space-y-6">
         {questions.map((question, index) => {
           const questionKey = question?.id ?? index;
-          const title = question?.title || question?.question || `Câu ${index + 1}`;
+          const title = question?.title || question?.question || `${t("form.question")} ${index + 1}`;
           const options =
             question?.answers ||
             question?.options ||
@@ -67,7 +69,7 @@ export default function QuizAssignmentForm({ assignment, onSubmit, submitting })
                   const label =
                     typeof option === "string"
                       ? option
-                      : option?.text || option?.label || `Đáp án ${optionIndex + 1}`;
+                      : option?.text || option?.label || `${t("form.answer")} ${optionIndex + 1}`;
                   return (
                     <label
                       key={`${questionKey}-${value}`}

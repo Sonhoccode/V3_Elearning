@@ -12,7 +12,7 @@ i18n
     fallbackLng: "en",
     supportedLngs: ["vi", "en"],
 
-    ns: ["home", "common", "auth", "lesson"],
+    ns: ["home", "common", "auth", "lesson", "classes", "assessment"],
     defaultNS: "home",
 
     debug: import.meta.env.DEV,

@@ -9,6 +9,36 @@
   "Login": "Đăng nhập",
   "Logout": "Đăng xuất",
   "Profile": "Hồ sơ",
-  "Learn" : "Học"
-  
+  "Learn" : "Học",
+  "chatbot": {
+    "greeting": "Chào bạn, mình có thể hỗ trợ gì?",
+    "login_required": "Vui lòng đăng nhập để chat với AI.",
+    "no_answer": "Mình chưa có câu trả lời phù hợp.",
+    "connection_error": "Không thể kết nối tới AI.",
+    "title": "Trợ lý học tập",
+    "close": "Đóng",
+    "assessment_prompt": "Muốn đánh giá năng lực?",
+    "start_test": "Bắt đầu bài test",
+    "replying": "Đang trả lời...",
+    "need_to": "Bạn cần",
+    "login": "đăng nhập",
+    "to_chat": "để chat với AI.",
+    "input_placeholder": "Nhập câu hỏi...",
+    "send": "Gửi"
+  },
+  "header": {
+    "system_error": "Hệ thống đang gặp sự cố, vui lòng thử lại sau.",
+    "classes": "Lớp học",
+    "editor_code": "Soạn thảo Code",
+    "more": "Thêm"
+  },
+  "playground": {
+    "title": "Soạn thảo Code",
+    "desc": "Thực hành HTML/CSS/JS trực tiếp trong trình duyệt.",
+    "auto_run": "Auto run",
+    "run": "Run",
+    "reset": "Khôi phục",
+    "editor": "Trình soạn thảo",
+    "preview": "Kết quả"
+  }
 }

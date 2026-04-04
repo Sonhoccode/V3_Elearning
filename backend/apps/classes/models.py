@@ -79,4 +79,5 @@ class Submission(models.Model):
     )
     submitted_content = models.JSONField()
     score = models.FloatField(null=True, blank=True)
+    ai_feedback = models.TextField(null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)

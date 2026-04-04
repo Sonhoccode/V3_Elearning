@@ -5,6 +5,8 @@
         "home": "Trang chủ",
         "next": "Tiếp theo",
         "previous": "Bài trước",
+        "progress": "Tiến độ",
+        "completed": "Đã hoàn thành",
         "no_lessons": "Chưa có bài học nào.",
         "loading_lessons": "Đang tải khóa học...",
         "not_found_course": "Không tìm thấy khóa học.",

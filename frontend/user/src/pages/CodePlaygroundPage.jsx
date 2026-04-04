@@ -32,7 +32,10 @@ btn?.addEventListener("click", () => {
   alert("Hello from JS!");
 });`;
 
+import { useTranslation } from "react-i18next";
+
 export default function CodePlaygroundPage() {
+  const { t } = useTranslation("common");
   const [html, setHtml] = useState(DEFAULT_HTML);
   const [css, setCss] = useState(DEFAULT_CSS);
   const [js, setJs] = useState(DEFAULT_JS);
@@ -88,9 +91,9 @@ export default function CodePlaygroundPage() {
       <div className="mx-auto flex w-full flex-col gap-6">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Editor code</h1>
+            <h1 className="text-3xl font-bold text-slate-900">{t("playground.title", "Editor code")}</h1>
             <p className="text-slate-600">
-              Thực hành HTML/CSS/JS trực tiếp trong trình duyệt.
+              {t("playground.desc", "Thực hành HTML/CSS/JS trực tiếp trong trình duyệt.")}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -101,21 +104,21 @@ export default function CodePlaygroundPage() {
                 onChange={(e) => setAutoRun(e.target.checked)}
                 className="h-4 w-4 accent-teal-600"
               />
-              Auto run
+              {t("playground.auto_run", "Auto run")}
             </label>
             <button
               type="button"
               onClick={handleRun}
               className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
             >
-              Run
+              {t("playground.run", "Run")}
             </button>
             <button
               type="button"
               onClick={handleReset}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
             >
-              Reset
+              {t("playground.reset", "Reset")}
             </button>
           </div>
         </header>
@@ -123,7 +126,7 @@ export default function CodePlaygroundPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-10 lg:h-[calc(100vh-14rem)]">
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-3 lg:flex lg:h-full lg:flex-col">
             <h2 className="mb-3 text-lg font-semibold text-slate-800">
-              Editor
+              {t("playground.editor", "Editor")}
             </h2>
             <div className="flex flex-wrap gap-2">
               {[
@@ -214,7 +217,7 @@ export default function CodePlaygroundPage() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-7 lg:flex lg:h-full lg:flex-col">
             <h2 className="mb-3 text-lg font-semibold text-slate-800">
-              Preview
+              {t("playground.preview", "Preview")}
             </h2>
             <div className="h-[420px] flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white lg:h-full">
               <iframe

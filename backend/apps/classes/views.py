@@ -3,6 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+import json
+import threading
+from apps.ai.grader import grade_code_submission
 
 from .models import Class, ClassEnrollment, Assignment, Submission
 from .serializers import (
@@ -225,6 +228,36 @@ class StudentAssignmentSubmitView(APIView):
                 assignment_id=assignment,
                 student=request.user,
             )
+            
+            # Tự động chấm điểm bằng AI chạy ngầm nếu là CODE
+            if assignment.type == "CODE":
+                def run_grading():
+                    try:
+                        try:
+                            submitted_str = json.dumps(obj.submitted_content, ensure_ascii=False, indent=2)
+                            assignment_content_str = json.dumps(assignment.content, ensure_ascii=False, indent=2)
+                        except Exception:
+                            submitted_str = str(obj.submitted_content)
+                            assignment_content_str = str(assignment.content)
+                            
+                        result = grade_code_submission(
+                            assignment_title=assignment.title,
+                            assignment_content=assignment_content_str,
+                            submitted_code=submitted_str
+                        )
+                        
+                        if result.get("score") is not None:
+                            obj.score = result["score"]
+                        obj.ai_feedback = result.get("feedback")
+                        obj.save(update_fields=["score", "ai_feedback"])
+                    except Exception as e:
+                        obj.ai_feedback = f"Lỗi trong quá trình chấm điểm ngầm: {str(e)}"
+                        obj.save(update_fields=["ai_feedback"])
+
+                # Sử dụng thread để không block luồng xử lý chính
+                thread = threading.Thread(target=run_grading)
+                thread.start()
+
             return Response(SubmissionSerializer(obj).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

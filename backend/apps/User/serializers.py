@@ -1,8 +1,10 @@
 from django.contrib.auth import authenticate
+from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from apps.Common.models import User
+from .models import TestResult
 
 
 class GmailTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -36,3 +38,19 @@ class GmailTokenObtainPairSerializer(TokenObtainPairSerializer):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }
+
+
+class TestResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestResult
+        fields = (
+            "id",
+            "score",
+            "level",
+            "strengths",
+            "weaknesses",
+            "recommended_paths",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")

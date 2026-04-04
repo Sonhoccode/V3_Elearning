@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     "apps.Common.apps.CommonConfig",
     # User
     "apps.User.apps.UserConfig",
+    # AI Chatbot
+    "apps.ai.apps.AiConfig",
+    "apps.chat.apps.ChatConfig",
 ]
 
 MIDDLEWARE = [

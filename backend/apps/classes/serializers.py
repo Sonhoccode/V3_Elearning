@@ -49,9 +49,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "student_info",
             "submitted_content",
             "score",
+            "ai_feedback",
             "submitted_at",
         ]
-        read_only_fields = ["id", "assignment_id", "student", "score", "submitted_at"]
+        read_only_fields = ["id", "assignment_id", "student", "score", "ai_feedback", "submitted_at"]
 
 
 class JoinClassSerializer(serializers.Serializer):

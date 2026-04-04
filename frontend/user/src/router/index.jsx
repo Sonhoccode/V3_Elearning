@@ -14,6 +14,7 @@ import CodePlaygroundPage from "../pages/CodePlaygroundPage.jsx";
 import ClassDashboardPage from "../pages/ClassDashboardPage.jsx";
 import ClassDetailPage from "../pages/ClassDetailPage.jsx";
 import ClassAssignmentSubmissionsPage from "../pages/ClassAssignmentSubmissionsPage.jsx";
+import AssessmentQuizPage from "../pages/AssessmentQuizPage.jsx";
 
 import { AuthProvider } from "../contexts/useAuth.jsx";
 
@@ -112,6 +113,10 @@ const router = createBrowserRouter([
       {
         path: "classes/:id/assignments/:assignmentId/submissions",
         element: <ClassAssignmentSubmissionsPage />,
+      },
+      {
+        path: "assessment",
+        element: <AssessmentQuizPage />,
       },
     ],
   },

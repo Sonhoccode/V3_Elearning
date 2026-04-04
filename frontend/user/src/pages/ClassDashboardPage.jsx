@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../contexts/useAuth.jsx";
 import {
   createClass,
@@ -12,6 +13,7 @@ export default function ClassDashboardPage() {
   const { user, loading } = useAuth();
   const [classes, setClasses] = useState([]);
   const [status, setStatus] = useState({ loading: false, error: "" });
+  const { t } = useTranslation("classes");
   const [className, setClassName] = useState("");
   const [joinCode, setJoinCode] = useState("");
 
@@ -27,7 +29,7 @@ export default function ClassDashboardPage() {
     } catch (err) {
       setStatus({
         loading: false,
-        error: err?.response?.data?.detail || "Không thể tải danh sách lớp",
+        error: err?.response?.data?.detail || t("messages.load_classes_failed", "Không thể tải danh sách lớp"),
       });
       return;
     }
@@ -49,7 +51,7 @@ export default function ClassDashboardPage() {
     } catch (err) {
       setStatus({
         loading: false,
-        error: err?.response?.data?.detail || "Tạo lớp thất bại",
+        error: err?.response?.data?.detail || t("messages.create_class_failed", "Tạo lớp thất bại"),
       });
     }
   };
@@ -65,17 +67,17 @@ export default function ClassDashboardPage() {
     } catch (err) {
       setStatus({
         loading: false,
-        error: err?.response?.data?.detail || "Tham gia lớp thất bại",
+        error: err?.response?.data?.detail || t("messages.join_class_failed", "Tham gia lớp thất bại"),
       });
     }
   };
 
   if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
+    return <div className="text-center mt-20">{t("status.loading", "Đang tải...")}</div>;
   }
 
   if (!user) {
-    return <div className="text-center mt-20">Chưa đăng nhập</div>;
+    return <div className="text-center mt-20">{t("status.not_logged_in", "Chưa đăng nhập")}</div>;
   }
 
   return (
@@ -84,10 +86,10 @@ export default function ClassDashboardPage() {
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
-              Dashboard Lớp Học
+              {t("titles.class_dashboard", "Dashboard Lớp Học")}
             </h1>
             <p className="text-slate-600">
-              Quản lý lớp học và bài tập theo vai trò của bạn.
+              {t("labels.dashboard_desc", "Quản lý lớp học và bài tập theo vai trò của bạn.")}
             </p>
           </div>
         </header>
@@ -105,14 +107,14 @@ export default function ClassDashboardPage() {
               className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
             >
               <h2 className="text-lg font-semibold text-slate-800">
-                Tạo lớp mới
+                {t("titles.create_class", "Tạo lớp mới")}
               </h2>
               <div className="mt-4 flex flex-col gap-3">
                 <input
                   type="text"
                   value={className}
                   onChange={(e) => setClassName(e.target.value)}
-                  placeholder="Tên lớp học"
+                  placeholder={t("form.class_name", "Tên lớp học")}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
                 <button
@@ -120,7 +122,7 @@ export default function ClassDashboardPage() {
                   disabled={status.loading}
                   className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
                 >
-                  {status.loading ? "Đang tạo..." : "Tạo lớp"}
+                  {status.loading ? t("status.creating", "Đang tạo...") : t("buttons.create_class", "Tạo lớp")}
                 </button>
               </div>
             </form>
@@ -132,14 +134,14 @@ export default function ClassDashboardPage() {
               className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
             >
               <h2 className="text-lg font-semibold text-slate-800">
-                Tham gia lớp học
+                {t("titles.join_class", "Tham gia lớp học")}
               </h2>
               <div className="mt-4 flex flex-col gap-3">
                 <input
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value)}
-                  placeholder="Nhập join code"
+                  placeholder={t("form.join_code_placeholder", "Nhập join code")}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
                 <button
@@ -147,7 +149,7 @@ export default function ClassDashboardPage() {
                   disabled={status.loading}
                   className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
                 >
-                  {status.loading ? "Đang tham gia..." : "Tham gia"}
+                  {status.loading ? t("status.joining", "Đang tham gia...") : t("buttons.join", "Tham gia")}
                 </button>
               </div>
             </form>
@@ -156,10 +158,10 @@ export default function ClassDashboardPage() {
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold text-slate-900">
-            Danh sách lớp
+            {t("titles.class_list", "Danh sách lớp")}
           </h2>
           {status.loading ? (
-            <div className="text-sm text-slate-500">Đang tải lớp...</div>
+            <div className="text-sm text-slate-500">{t("status.loading_classes", "Đang tải lớp...")}</div>
           ) : classes.length ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {classes.map((item) => (
@@ -168,7 +170,7 @@ export default function ClassDashboardPage() {
             </div>
           ) : (
             <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
-              Chưa có lớp học nào.
+              {t("status.no_classes", "Chưa có lớp học nào.")}
             </div>
           )}
         </section>

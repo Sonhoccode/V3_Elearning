@@ -2,11 +2,21 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }) {
+export default function LessonSidebar({
+  lessons,
+  currentLessonSlug,
+  courseSlug,
+  progress,
+  completedSlugs = [],
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState({});
   const {t} = useTranslation("lesson");
+  const completedSet = useMemo(
+    () => new Set(Array.isArray(completedSlugs) ? completedSlugs : []),
+    [completedSlugs]
+  );
 
   const treeData = useMemo(() => {
     if (!lessons) return [];
@@ -31,6 +41,33 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
 
     return tree;
   }, [lessons]);
+
+  const groupCompletionMap = useMemo(() => {
+    const map = new Map();
+    if (!treeData.length) return map;
+
+    const collectLessonSlugs = (node) => {
+      if (!node) return [];
+      if (!node.children || node.children.length === 0) {
+        return node.kind === "lesson" ? [node.slug] : [];
+      }
+      return node.children.flatMap(collectLessonSlugs);
+    };
+
+    const walk = (node) => {
+      const lessonSlugs = collectLessonSlugs(node);
+      if (lessonSlugs.length) {
+        const allCompleted = lessonSlugs.every((slug) => completedSet.has(slug));
+        map.set(String(node.id), allCompleted);
+      }
+      if (node.children && node.children.length) {
+        node.children.forEach(walk);
+      }
+    };
+
+    treeData.forEach(walk);
+    return map;
+  }, [treeData, completedSet]);
 
   useEffect(() => {
     if (currentLessonSlug && lessons) {
@@ -61,6 +98,7 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
       const isExpanded = !!expanded[String(item.id)];
       
       if (hasChildren) {
+          const isCompleted = groupCompletionMap.get(String(item.id));
           return (
               <div key={item.id} className="mb-1">
                   <div className={`flex items-center gap-1 pr-2 rounded-lg transition-colors hover:bg-gray-50`}>
@@ -94,6 +132,11 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
                       >
                          {item.title}
                       </div>
+                      {isCompleted && (
+                        <span className="text-teal-500 text-sm pr-2" aria-label={t("lesson.completed")}>
+                          ✓
+                        </span>
+                      )}
                   </div>
                   
                   <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"}`}>
@@ -103,6 +146,7 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
           );
       }
 
+      const isCompleted = completedSet.has(item.slug);
       return (
           <NavLink
               key={item.id}
@@ -118,7 +162,12 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
               style={{ paddingLeft: `${(level * 16) + 40}px` }} 
           >
               <span className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? "bg-teal-500" : "bg-gray-300"}`}></span>
-              <span className="line-clamp-1">{item.title}</span>
+              <span className="line-clamp-1 flex-1">{item.title}</span>
+              {isCompleted && (
+                <span className="text-teal-500 text-sm" aria-label={t("lesson.completed")}>
+                  ✓
+                </span>
+              )}
           </NavLink>
       );
   };
@@ -159,6 +208,19 @@ export default function LessonSidebar({ lessons, currentLessonSlug, courseSlug }
             <h2 className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2">
               {t("lesson.title")}
             </h2>
+            {progress && progress.total > 0 && (
+              <div className="mt-3">
+                <div className="text-xs text-gray-600">
+                  {t("lesson.progress")}: {progress.completed}/{progress.total} ({progress.percent}%)
+                </div>
+                <div className="mt-2 h-2 w-full rounded-full bg-gray-200">
+                  <div
+                    className="h-2 rounded-full bg-teal-500 transition-all"
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto py-4 space-y-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">

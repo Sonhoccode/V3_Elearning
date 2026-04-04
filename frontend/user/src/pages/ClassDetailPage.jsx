@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import { useAuth } from "../contexts/useAuth.jsx";
 import {
   createAssignment,
@@ -943,11 +944,25 @@ export default function ClassDetailPage() {
                               </div>
                             )}
                             {!mySubmissionState.loading && mySubmission && (
-                              <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-                                {typeof mySubmission.submitted_content === "string"
-                                  ? mySubmission.submitted_content
-                                  : mySubmission.submitted_content?.code || ""}
-                              </pre>
+                              <div className="mt-3">
+                                <pre className="whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+                                  {typeof mySubmission.submitted_content === "string"
+                                    ? mySubmission.submitted_content
+                                    : mySubmission.submitted_content?.code || ""}
+                                </pre>
+                                {mySubmission.ai_feedback && (
+                                  <div className="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-4">
+                                    <h5 className="font-semibold text-teal-800">
+                                      AI Feedback
+                                    </h5>
+                                    <div className="prose prose-sm prose-teal mt-2 max-w-none text-teal-700">
+                                      <ReactMarkdown>
+                                        {mySubmission.ai_feedback}
+                                      </ReactMarkdown>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         ) : (

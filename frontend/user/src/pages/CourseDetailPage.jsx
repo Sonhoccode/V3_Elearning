@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -7,13 +7,19 @@ import { fetchCourses } from "../api/coursesAPI";
 import {
   fetchLessonsByCourse,
   fetchLessonDetail,
+  fetchLessonProgress,
+  markLessonCompleted,
 } from "../api/lessonsAPI";
+import { useAuth } from "../contexts/useAuth.jsx";
 
 export default function CourseDetailPage() {
   const { slug, lessonSlug } = useParams();
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const { t } = useTranslation("lesson");
+  const { user } = useAuth();
+  const completionRef = useRef(null);
+  const [completedSlugs, setCompletedSlugs] = useState([]);
 
   const {
     data: courses = [],
@@ -49,6 +55,79 @@ export default function CourseDetailPage() {
     gcTime: 1_800_000,
   });
 
+  const progressKey = useMemo(
+    () => (slug ? `lesson-progress:${slug}` : ""),
+    [slug]
+  );
+
+  useEffect(() => {
+    if (!slug) {
+      setCompletedSlugs([]);
+      return;
+    }
+
+    if (user?.id) {
+      fetchLessonProgress({ courseSlug: slug })
+        .then((data) => setCompletedSlugs(data))
+        .catch(() => setCompletedSlugs([]));
+      return;
+    }
+
+    if (!progressKey) {
+      setCompletedSlugs([]);
+      return;
+    }
+
+    try {
+      const raw = localStorage.getItem(progressKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      setCompletedSlugs(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setCompletedSlugs([]);
+    }
+  }, [slug, user?.id, progressKey]);
+
+  useEffect(() => {
+    if (user?.id || !progressKey) return;
+    localStorage.setItem(progressKey, JSON.stringify(completedSlugs));
+  }, [user?.id, progressKey, completedSlugs]);
+
+  const countableLessonSlugs = useMemo(() => {
+    if (!lessons.length) return new Set();
+    const hasChildren = new Set();
+
+    lessons.forEach((lesson) => {
+      if (lesson?.parent != null) {
+        hasChildren.add(String(lesson.parent));
+      }
+    });
+
+    const slugs = new Set();
+    lessons.forEach((lesson) => {
+      if (!lesson) return;
+      if (lesson.kind) {
+        if (lesson.kind === "lesson") slugs.add(lesson.slug);
+        return;
+      }
+      const isLeaf = lesson.id != null && !hasChildren.has(String(lesson.id));
+      if (isLeaf) slugs.add(lesson.slug);
+    });
+
+    return slugs;
+  }, [lessons]);
+
+  const progress = useMemo(() => {
+    const total = countableLessonSlugs.size;
+    if (!total) return { completed: 0, total: 0, percent: 0 };
+    const completedSet = new Set(completedSlugs);
+    let completed = 0;
+    countableLessonSlugs.forEach((slugItem) => {
+      if (completedSet.has(slugItem)) completed += 1;
+    });
+    const percent = Math.round((completed / total) * 100);
+    return { completed, total, percent };
+  }, [countableLessonSlugs, completedSlugs]);
+
   const {
     data: currentLesson,
     isLoading: lessonLoading,
@@ -64,6 +143,30 @@ export default function CourseDetailPage() {
     staleTime: 300_000,
     gcTime: 1_800_000,
   });
+
+  useEffect(() => {
+    if (!lessonSlug || !completionRef.current) return;
+    if (!countableLessonSlugs.has(lessonSlug)) return;
+    if (completedSlugs.includes(lessonSlug)) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setCompletedSlugs((prev) => {
+            if (prev.includes(lessonSlug)) return prev;
+            return [...prev, lessonSlug];
+          });
+          if (user?.id) {
+            markLessonCompleted({ courseSlug: slug, lessonSlug }).catch(() => null);
+          }
+        }
+      },
+      { threshold: 0.6 }
+    );
+
+    observer.observe(completionRef.current);
+    return () => observer.disconnect();
+  }, [lessonSlug, countableLessonSlugs, completedSlugs, slug, user?.id]);
 
   // Navigation functions
   const currentIndex = lessons.findIndex((l) => l.slug === lessonSlug);
@@ -120,6 +223,8 @@ export default function CourseDetailPage() {
           lessons={lessons}
           currentLessonSlug={lessonSlug}
           courseSlug={slug}
+          progress={progress}
+          completedSlugs={completedSlugs}
         />
 
         <main className="flex-1 min-w-0 border-l border-gray-200 bg-white shadow-sm rounded-r-lg overflow-hidden">
@@ -134,9 +239,16 @@ export default function CourseDetailPage() {
               </svg>
               {t("lesson.back_home")}
             </NavLink>
-            <h1 className="text-4xl font-bold mb-2">
-                {currentLesson?.translation?.title || course.title}
-            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-4xl font-bold mb-2">
+                  {currentLesson?.translation?.title || course.title}
+              </h1>
+              {lessonSlug && completedSlugs.includes(lessonSlug) && (
+                <span className="mb-2 inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-100">
+                  {t("lesson.completed")}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -194,6 +306,7 @@ export default function CourseDetailPage() {
                   {t("lesson.next")} ❯
                 </button>
               </div>
+              <div ref={completionRef} className="h-2" aria-hidden="true" />
             </div>
           ) : (
             <div className="text-center py-12">

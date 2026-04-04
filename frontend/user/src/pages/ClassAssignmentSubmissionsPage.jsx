@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.jsx";
 import {
@@ -35,6 +37,7 @@ export default function ClassAssignmentSubmissionsPage() {
   const classId = Number(id);
   const assignmentKey = Number(assignmentId);
   const { user, loading } = useAuth();
+  const { t } = useTranslation("classes");
 
   const [assignment, setAssignment] = useState(null);
   const [students, setStudents] = useState([]);
@@ -65,7 +68,7 @@ export default function ClassAssignmentSubmissionsPage() {
       } catch (err) {
         setState({
           loading: false,
-          error: err?.response?.data?.detail || "Không thể tải dữ liệu bài nộp.",
+          error: err?.response?.data?.detail || t("messages.load_submissions_failed", "Không thể tải dữ liệu bài nộp."),
         });
       }
     };
@@ -127,11 +130,11 @@ export default function ClassAssignmentSubmissionsPage() {
   }, [assignment, submissions]);
 
   if (loading) {
-    return <div className="text-center mt-20">Loading...</div>;
+    return <div className="text-center mt-20">{t("status.loading", "Đang tải...")}</div>;
   }
 
   if (!user || !isTeacher) {
-    return <div className="text-center mt-20">Không có quyền truy cập</div>;
+    return <div className="text-center mt-20">{t("status.no_permission", "Không có quyền truy cập")}</div>;
   }
 
   return (
@@ -141,21 +144,21 @@ export default function ClassAssignmentSubmissionsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-3xl font-bold text-slate-900">
-                Danh sách bài nộp
+                {t("titles.assignment_submissions")}
               </h1>
               <p className="mt-2 text-sm text-slate-600">
-                {assignment?.title || "Bài tập"}
+                {assignment?.title || t("titles.assignment_submissions", "Bài tập")}
               </p>
             </div>
             <Link
               to={`/classes/${classId}`}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
             >
-              Quay lại lớp
+              {t("buttons.back_to_class")}
             </Link>
           </div>
           <div className="mt-4 text-sm text-slate-700">
-            Hoàn thành:{" "}
+            {t("labels.completed")}:{" "}
             <span className="font-semibold text-teal-600">
               {completedCount}
             </span>
@@ -173,10 +176,10 @@ export default function ClassAssignmentSubmissionsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-1">
             <h2 className="text-lg font-semibold text-slate-900">
-              Học viên
+              {t("titles.students_list")}
             </h2>
             {state.loading ? (
-              <div className="mt-3 text-sm text-slate-500">Đang tải...</div>
+              <div className="mt-3 text-sm text-slate-500">{t("status.loading")}</div>
             ) : students.length ? (
               <div className="mt-4 space-y-2">
                 {students.map((student) => {
@@ -202,9 +205,9 @@ export default function ClassAssignmentSubmissionsPage() {
                       <div className="mt-1 text-xs text-slate-500">
                         {hasSubmitted
                           ? assignment?.type === "QUIZ"
-                            ? `Đúng ${correctForStudent ?? 0}/${(assignment.content?.questions || []).length}`
-                            : "Đã nộp"
-                          : "Chưa nộp"}
+                            ? `${t("labels.correct_answers")} ${correctForStudent ?? 0}/${(assignment.content?.questions || []).length}`
+                            : t("status.submitted")
+                          : t("status.not_submitted")}
                       </div>
                     </button>
                   );
@@ -212,7 +215,7 @@ export default function ClassAssignmentSubmissionsPage() {
               </div>
             ) : (
               <div className="mt-3 text-sm text-slate-500">
-                Chưa có học viên trong lớp.
+                {t("status.no_students")}
               </div>
             )}
           </section>
@@ -220,31 +223,51 @@ export default function ClassAssignmentSubmissionsPage() {
           <section className="space-y-4 lg:col-span-2">
             {!selectedStudentId && (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-                Chọn học viên để xem bài nộp.
+                {t("status.select_student")}
               </div>
             )}
 
             {selectedStudentId && (
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 className="text-lg font-semibold text-slate-900">
-                  Bài nộp của học viên
+                  {t("titles.student_submission")}
                 </h3>
                 {!selectedSubmission && (
                   <div className="mt-3 text-sm text-slate-500">
-                    Học viên chưa nộp bài.
+                    {t("status.student_not_submitted")}
                   </div>
                 )}
                 {selectedSubmission && assignment?.type === "CODE" && (
-                  <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-                    {typeof selectedSubmission.submitted_content === "string"
-                      ? selectedSubmission.submitted_content
-                      : selectedSubmission.submitted_content?.code || ""}
-                  </pre>
+                  <>
+                    <pre className="mt-4 whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
+                      {typeof selectedSubmission.submitted_content === "string"
+                        ? selectedSubmission.submitted_content
+                        : selectedSubmission.submitted_content?.code || ""}
+                    </pre>
+
+                    {selectedSubmission.ai_feedback && (
+                      <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
+                            <span>🤖</span> {t("titles.ai_feedback")}
+                          </h4>
+                          {selectedSubmission.score !== null && (
+                            <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700">
+                              {t("labels.score")}: {selectedSubmission.score} / 10
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3 prose prose-sm max-w-none text-indigo-800">
+                          <ReactMarkdown>{selectedSubmission.ai_feedback}</ReactMarkdown>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
                 {selectedSubmission && assignment?.type === "QUIZ" && (
                   <div className="mt-4 space-y-4">
                     <div className="text-sm font-semibold text-teal-700">
-                      Số câu đúng: {correctCount} /{" "}
+                      {t("labels.correct_answers")}: {correctCount} /{" "}
                       {(assignment.content?.questions || []).length}
                     </div>
                     {(assignment.content?.questions || []).map((question, index) => {
@@ -255,7 +278,7 @@ export default function ClassAssignmentSubmissionsPage() {
                           className="rounded-xl border border-slate-100 p-3"
                         >
                           <div className="text-sm font-semibold text-slate-800">
-                            {question.title || `Câu ${index + 1}`}
+                            {question.title || `${t("form.question", "Câu hỏi")} ${index + 1}`}
                           </div>
                           <div className="mt-2 space-y-2 text-sm">
                             {(question.answers || []).map((answer) => {

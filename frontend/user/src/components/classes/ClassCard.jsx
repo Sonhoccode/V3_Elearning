@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function ClassCard({ item, isTeacher }) {
+  const { t } = useTranslation("classes");
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
@@ -20,7 +22,7 @@ export default function ClassCard({ item, isTeacher }) {
           to={`/classes/${item.id}`}
           className="rounded-lg bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700"
         >
-          Xem chi tiết
+          {t("buttons.view_detail", "Xem chi tiết")}
         </Link>
       </div>
     </div>

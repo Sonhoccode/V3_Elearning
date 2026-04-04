@@ -8,5 +8,36 @@
   "Register": "Register",
   "Login": "Login",
   "Logout": "Logout",
-  "Learn" : "Learn"
+  "Learn" : "Learn",
+  "chatbot": {
+    "greeting": "Hello, how can I help you?",
+    "login_required": "Please login to chat with AI.",
+    "no_answer": "I don't have a suitable answer yet.",
+    "connection_error": "Could not connect to AI.",
+    "title": "Study Assistant",
+    "close": "Close",
+    "assessment_prompt": "Want to evaluate your skills?",
+    "start_test": "Start test",
+    "replying": "Replying...",
+    "need_to": "You need to",
+    "login": "login",
+    "to_chat": "to chat with AI.",
+    "input_placeholder": "Ask a question...",
+    "send": "Send"
+  },
+  "header": {
+    "system_error": "System is encountering an issue, please try again later.",
+    "classes": "Classes",
+    "editor_code": "Code Editor",
+    "more": "More"
+  },
+  "playground": {
+    "title": "Code Editor",
+    "desc": "Practice HTML/CSS/JS directly in the browser.",
+    "auto_run": "Auto run",
+    "run": "Run",
+    "reset": "Reset",
+    "editor": "Editor",
+    "preview": "Preview"
+  }
 }

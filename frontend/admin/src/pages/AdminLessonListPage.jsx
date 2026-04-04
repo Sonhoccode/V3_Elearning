@@ -17,6 +17,7 @@ export default function AdminLessonListPage() {
     course: "",
     slug: "",
     order: 0,
+    kind: "lesson",
   });
 
   // Load lessons và courses
@@ -52,7 +53,7 @@ export default function AdminLessonListPage() {
     try {
       const res = await createLesson(form);
       setMessage("Tạo bài học mới thành công");
-      setForm({ course: "", slug: "", order: 0 });
+      setForm({ course: "", slug: "", order: 0, kind: "lesson" });
       loadData();
       navigate(`/lessons/${res.slug}`);
     } catch (err) {
@@ -70,7 +71,7 @@ export default function AdminLessonListPage() {
       {/* Form tạo bài học mới */}
       <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
         <h3 className="text-lg font-semibold mb-4 text-gray-700">Tạo bài học mới</h3>
-        <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Khóa học</label>
             <select
@@ -106,6 +107,17 @@ export default function AdminLessonListPage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Loại bài</label>
+            <select
+              value={form.kind || "lesson"}
+              onChange={(e) => handleChangeField("kind", e.target.value)}
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            >
+              <option value="lesson">Lesson</option>
+              <option value="group">Group</option>
+            </select>
+          </div>
+          <div>
             <Button type="submit" isLoading={creating} className="w-full">
               Tạo bài học
             </Button>
@@ -138,6 +150,7 @@ export default function AdminLessonListPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khóa học</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thứ tự</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kind</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngôn ngữ</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
                 </tr>
@@ -153,6 +166,7 @@ export default function AdminLessonListPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{lesson.slug}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{courseName}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.order}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.kind || "-"}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{langs}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <Button 
@@ -174,4 +188,3 @@ export default function AdminLessonListPage() {
     </div>
   );
 }
-

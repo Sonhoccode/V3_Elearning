@@ -5,6 +5,8 @@
         "home": "Home",
         "next": "Next",
         "previous": "Previous",
+        "progress": "Progress",
+        "completed": "Completed",
         "no_lessons": "No lessons available.",
         "loading_lessons": "Loading lessons...",
         "not_found_course": "Course not found.",

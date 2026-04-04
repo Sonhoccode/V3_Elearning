@@ -1,5 +1,6 @@
 # courses/models.py
 from django.db import models
+from django.conf import settings
 
 # choices cho trạng thái bài học
 STATUS_CHOICES = (
@@ -40,6 +41,11 @@ class Course(models.Model):
     
 # bài học
 class Lesson(models.Model):
+    KIND_CHOICES = (
+        ("group", "Group"),
+        ("lesson", "Lesson"),
+    )
+
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -55,6 +61,7 @@ class Lesson(models.Model):
     )
 
     slug = models.SlugField()
+    kind = models.CharField(max_length=10, choices=KIND_CHOICES, default="lesson")
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -98,3 +105,24 @@ class LessonTranslation(models.Model):
 
     def __str__(self):
         return f"{self.lesson.slug} [{self.lang}]"
+
+
+class LessonProgress(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="lesson_progress",
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name="progress_records",
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "lesson")
+        db_table = "lesson_progress"
+
+    def __str__(self):
+        return f"{self.user_id} -> {self.lesson_id}"

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const createEmptyQuestion = () => ({
@@ -17,6 +19,8 @@ export default function AssignmentForm({
   onCancel,
   title,
 }) {
+  const { t } = useTranslation("classes");
+
   const update = (patch) => {
     if (onChange) onChange({ ...value, ...patch });
   };
@@ -84,7 +88,7 @@ export default function AssignmentForm({
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <h3 className="text-lg font-semibold text-slate-900">
-        {title || "Tạo bài tập mới"}
+        {title || t("titles.create_new_assignment")}
       </h3>
       {error && (
         <div className="mt-2 text-sm text-red-600">
@@ -96,7 +100,7 @@ export default function AssignmentForm({
           type="text"
           value={value.title}
           onChange={(e) => update({ title: e.target.value })}
-          placeholder="Tiêu đề bài tập"
+          placeholder={t("form.assignment_title")}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -120,14 +124,14 @@ export default function AssignmentForm({
           <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold text-slate-800">
-                Câu hỏi
+                {t("form.question")}
               </h4>
               <button
                 type="button"
                 onClick={addQuestion}
                 className="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-100"
               >
-                Thêm câu hỏi
+                {t("form.add_question")}
               </button>
             </div>
 
@@ -138,14 +142,14 @@ export default function AssignmentForm({
               >
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-slate-600">
-                    Câu {index + 1}
+                    {t("form.question")} {index + 1}
                   </label>
                   <button
                     type="button"
                     onClick={() => removeQuestion(question.id)}
                     className="text-xs text-red-500"
                   >
-                    Xóa
+                    {t("form.remove")}
                   </button>
                 </div>
                 <input
@@ -154,7 +158,7 @@ export default function AssignmentForm({
                   onChange={(e) =>
                     updateQuizQuestion(question.id, { title: e.target.value })
                   }
-                  placeholder="Nội dung câu hỏi"
+                  placeholder={t("form.question")}
                   className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
 
@@ -181,7 +185,7 @@ export default function AssignmentForm({
                         onChange={(e) =>
                           updateAnswer(question.id, answer.id, e.target.value)
                         }
-                        placeholder={`Đáp án ${answerIndex + 1}`}
+                        placeholder={`${t("form.answer")} ${answerIndex + 1}`}
                         className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                       />
                       <button
@@ -189,7 +193,7 @@ export default function AssignmentForm({
                         onClick={() => removeAnswer(question.id, answer.id)}
                         className="text-xs text-red-500"
                       >
-                        Xóa
+                        {t("form.remove")}
                       </button>
                     </div>
                   ))}
@@ -198,7 +202,7 @@ export default function AssignmentForm({
                     onClick={() => addAnswer(question.id)}
                     className="text-xs font-semibold text-teal-600"
                   >
-                    + Thêm đáp án
+                    + {t("form.add_answer")}
                   </button>
                 </div>
               </div>
@@ -214,7 +218,7 @@ export default function AssignmentForm({
               onChange={(e) =>
                 update({ code: { ...value.code, language: e.target.value } })
               }
-              placeholder="Ngôn ngữ (vd: javascript, python, java)"
+              placeholder={t("form.language")}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <textarea
@@ -223,7 +227,7 @@ export default function AssignmentForm({
                 update({ code: { ...value.code, prompt: e.target.value } })
               }
               rows={3}
-              placeholder="Mô tả đề bài"
+              placeholder={t("form.prompt")}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <textarea
@@ -234,7 +238,7 @@ export default function AssignmentForm({
                 })
               }
               rows={5}
-              placeholder="Starter code"
+              placeholder={t("form.starter_code")}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
@@ -246,7 +250,7 @@ export default function AssignmentForm({
             disabled={submitting}
             className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
           >
-            {submitting ? "Đang xử lý..." : submitLabel || "Tạo bài tập"}
+            {submitting ? t("status.loading") : submitLabel || t("titles.create_assignment")}
           </button>
           {onCancel && (
             <button
@@ -254,7 +258,7 @@ export default function AssignmentForm({
               onClick={onCancel}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
             >
-              Hủy
+              {t("buttons.close")}
             </button>
           )}
         </div>
