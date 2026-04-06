@@ -2,18 +2,10 @@
 
 import axios from "axios";
 
-const baseURL =
-  (
-    import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_API_BASE ||
-    import.meta.env.VITE_BASE_URL ||
-    ""
-  ).replace(/\/$/, "");
+const baseURL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
-// Nếu chưa set env thì fallback về localhost:8000
-const resolvedBaseURL = baseURL
-  ? `${baseURL}/api`
-  : "http://127.0.0.1:8000/api";
+// If env is not set, fall back to same-origin /api
+const resolvedBaseURL = baseURL ? `${baseURL}/api` : "/api";
 
 const api = axios.create({
   baseURL: resolvedBaseURL,

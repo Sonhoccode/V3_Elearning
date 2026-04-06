@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const LOGIN_URL = `${BASE_URL}/api/user/token/`;
 const REFRESH_URL = `${BASE_URL}/api/user/token/refresh/`;
 const LOGOUT_URL = `${BASE_URL}/api/user/logout/`;
