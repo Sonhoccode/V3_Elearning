@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    last_login = models.DateTimeField(blank=True, null=True)  # 🔥 QUAN TRỌNG
+    last_login = models.DateTimeField(blank=True, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
 
@@ -82,33 +82,4 @@ class Verification(models.Model):
 
     def __str__(self):
         return f"OTP {self.vc_otp} - {self.us.username}"
-    
-# class Quiz(models.Model):
-#     title = models.CharField(max_length=255)
-#     description = models.TextField()
-#     course = models.ForeignKey('Course', on_delete=models.CASCADE)
-#     lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
-#     time_limit = models.IntegerField(help_text="Time limit in minutes")
-#     passing_score = models.FloatField()
-#     is_published = models.BooleanField(default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     class Meta:
-#         db_table = "quizzes"
-
-#     def __str__(self):
-#         return self.title
-
-# class Question(models.Model):
-#     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
-#     content = models.TextField()
-#     question_type = models.CharField(max_length=50, choices=(('mcq', 'Multiple Choice'), ('tf', 'True/False')))
-#     order = models.IntegerField(default=0)
-#     points = models.FloatField(default=1.0)
-
-#     class Meta:
-#         db_table = "questions"
-#         ordering = ['order']
-#     def __str__(self):
-#         return f"Question {self.id} for Quiz {self.quiz.title}"
+   

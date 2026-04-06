@@ -1,17 +1,59 @@
 // src/router/index.jsx
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+
 import HomePage from "../pages/HomePage";
 import RoadmapPage from "../pages/RoadmapPage";
 import CourseDetailPage from "../pages/CourseDetailPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 import OAuthCallback from "../router/OAuthCallback";
-import { AuthProvider } from "../contexts/useAuth.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import ProfileUpdatePage from "../pages/ProfileUpdatePage.jsx";
-import TeacherPage from "../pages/TeacherPage.jsx";
-import StudyPlanPage from "../pages/StudyPlanPage.jsx";
+import CodePlaygroundPage from "../pages/CodePlaygroundPage.jsx";
+import ClassDashboardPage from "../pages/ClassDashboardPage.jsx";
+import ClassDetailPage from "../pages/ClassDetailPage.jsx";
+import ClassAssignmentSubmissionsPage from "../pages/ClassAssignmentSubmissionsPage.jsx";
+import AssessmentQuizPage from "../pages/AssessmentQuizPage.jsx";
+
+import { AuthProvider } from "../contexts/useAuth.jsx";
+
+import { queryClient } from "../queryClient";
+import { fetchLessonsByCourse } from "../api/lessonsAPI";
+import { fetchCourses } from "../api/coursesAPI";
+
+import i18n from "../i18n/i18.js";
+
+async function courseIndexLoader({ params }) {
+  const { slug } = params;
+
+  try {
+    const courses = await queryClient.ensureQueryData({
+      queryKey: ["courses"],
+      queryFn: ({ signal }) => fetchCourses({ signal }),
+      staleTime: 300_000,
+    });
+    const course = courses.find((c) => c.slug === slug);
+    if (!course) return null;
+
+    const lessons = await queryClient.ensureQueryData({
+      queryKey: ["lessons-by-course", slug, i18n.language],
+      queryFn: ({ signal }) =>
+        fetchLessonsByCourse({
+          courseSlug: slug,
+          lang: i18n.language,
+          signal,
+        }),
+      staleTime: 300_000,
+    });
+    if (!lessons.length) return null;
+
+    return redirect(`/courses/${slug}/lessons/${lessons[0].slug}`);
+  // eslint-disable-next-line no-unused-vars
+  } catch (err) {
+    return null;
+  }
+}
 
 const router = createBrowserRouter([
   {
@@ -41,6 +83,7 @@ const router = createBrowserRouter([
       },
       {
         path: "courses/:slug",
+        loader: courseIndexLoader,
         element: <CourseDetailPage />,
       },
       {
@@ -55,23 +98,28 @@ const router = createBrowserRouter([
         path: "profile/update",
         element: <ProfileUpdatePage />,
       },
-    ],
-  },
-      //Teacher routes
-  {
-    path: "teacher",
-    element: (
-      <AuthProvider>
-        <TeacherPage role={["teacher"]}/>
-      </AuthProvider>
-    ),
-    children: [
       {
-        path: "study-plan",
-        element: <StudyPlanPage />,
+        path: "playground",
+        element: <CodePlaygroundPage />,
+      },
+      {
+        path: "classes",
+        element: <ClassDashboardPage />,
+      },
+      {
+        path: "classes/:id",
+        element: <ClassDetailPage />,
+      },
+      {
+        path: "classes/:id/assignments/:assignmentId/submissions",
+        element: <ClassAssignmentSubmissionsPage />,
+      },
+      {
+        path: "assessment",
+        element: <AssessmentQuizPage />,
       },
     ],
-  }  
+  },
 ]);
 
 export default router;

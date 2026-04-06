@@ -4,19 +4,20 @@ import { NavLink } from "react-router-dom";
 import logo from "../assets/logo_full.svg";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
-import { fetchCategories } from "../api/categoriesAPI";
-import { fetchCourses } from "../api/coursesAPI";
+import { fetchCategories } from "../api/categoriesAPI.js";
+import { fetchCourses } from "../api/coursesAPI.js";
+import { useTranslation } from "react-i18next";
 import DropLanguage from "./items/LanguageDrop.jsx";
 import AuthItems from "./items/AuthItems.jsx";
 
 export default function Header() {
+  const { t } = useTranslation("common");
   const [openSlug, setOpenSlug] = useState(null);
   
-  const qc = useQueryClient();
-
+  // Lay danh mục và khóa học
   const {
     data: courses = [],
     isLoading: coursesLoading,
@@ -24,12 +25,13 @@ export default function Header() {
   } = useQuery({
     queryKey: ["courses"],
     queryFn: ({ signal }) => fetchCourses({ signal }),
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
+  // Lấy danh mục và khóa học theo danh mục
   const {
     data: categories = [],
     isLoading: categoriesLoading,
@@ -37,26 +39,18 @@ export default function Header() {
   } = useQuery({
     queryKey: ["categories"],
     queryFn: ({ signal }) => fetchCategories({ signal }),
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
+    staleTime: 300_000,
+    gcTime: 1_800_000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (!categoriesLoading && !categoriesError) {
-      qc.prefetchQuery({
-        queryKey: ["courses"],
-        queryFn: ({ signal }) => fetchCourses({ signal }),
-        staleTime: 360_000,
-      });
-    }
-  }, [categoriesLoading, categoriesError, qc]);
-
+  // Trang thái mở menu danh mục
   const toggle = (slug) => {
     setOpenSlug((prev) => (prev === slug ? null : slug));
   };
 
+  // Đóng menu khi click ra ngoài
   useEffect(() => {
     const onDocClick = (e) => {
       if (!e.target.closest("[data-cat-menu]")) setOpenSlug(null);
@@ -66,7 +60,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full flex flex-col items-center">
+    <header className="site-header w-full flex flex-col items-center">
       <div className="w-full bg-white shadow-md">
         <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
           <NavLink to="/" className="h-full flex items-center mr-4">
@@ -88,13 +82,14 @@ export default function Header() {
                 </span>
               </div>
             )}
-
+            {/* Error */}
             {categoriesError && (
               <div className="text-red-500 text-sm">
-                <h1>Hệ thống đang gặp sự cố, vui lòng thử lại sau.</h1>
+                <h1>{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</h1>
               </div>
             )}
 
+            {/* Thành công */}
             {!categoriesLoading &&
               !categoriesError &&
               categories.map((cat) => (
@@ -117,7 +112,8 @@ export default function Header() {
                       }
                     />
                   </button>
-
+                  
+                  {/* Drop menu */}
                   {openSlug === cat.slug && (
                     <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
                       {cat.courses?.length ? (
@@ -138,6 +134,46 @@ export default function Header() {
                   )}
                 </div>
               ))}
+
+            <div className="relative" data-cat-menu>
+              <button
+                onClick={() => toggle("more")}
+                type="button"
+                className={`text-lg flex items-center gap-1 px-4 py-4 transition-all ${
+                  openSlug === "more"
+                    ? "text-gray-700 bg-[#FFCCCC] font-bold"
+                    : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
+                }`}
+              >
+                {t("header.more", "Thêm")}
+                <ArrowDropDownIcon
+                  className={
+                    openSlug === "more"
+                      ? "rotate-180 transition-transform"
+                      : "transition-transform"
+                  }
+                />
+              </button>
+
+              {openSlug === "more" && (
+                <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
+                  <NavLink
+                    to="/classes"
+                    className="block px-3 py-2 hover:bg-gray-100 rounded"
+                    onClick={() => setOpenSlug(null)}
+                  >
+                    {t("header.classes", "Lớp học")}
+                  </NavLink>
+                  <NavLink
+                    to="/playground"
+                    className="block px-3 py-2 hover:bg-gray-100 rounded"
+                    onClick={() => setOpenSlug(null)}
+                  >
+                    {t("header.editor_code", "Editor Code")}
+                  </NavLink>
+                </aside>
+              )}
+            </div>
           </div>
 
           {/* drop menu language */}
@@ -158,7 +194,7 @@ export default function Header() {
           </div>
         )}
 
-        {coursesError && <div className="text-red-500 text-sm"></div>}
+        {coursesError && <div className="text-red-500 text-sm">{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</div>}
 
         {!coursesLoading && !coursesError && (
           <nav className="flex flex-wrap justify-center ">
@@ -170,8 +206,8 @@ export default function Header() {
                   className={({ isActive }) =>
                     `item-courses w-32 py-4 text-center font-semibold transition-colors ${
                       isActive
-                        ? "bg-[#FFCCCC] text-white"
-                        : "text-gray-700 hover:bg-gray-200"
+                        ? "bg-teal-500 text-white hover:bg-teal-400"
+                        : "text-gray-700 hover:bg-teal-500 hover:text-white "
                     }`
                   }
                 >

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../../contexts/useAuth";
 import { useNavigate } from "react-router-dom";
+import { github_login } from "../../api/auth.api";
 import { useTranslation } from "react-i18next";
+
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -40,7 +43,10 @@ const Register = () => {
       await verify_otp(email, otp);
       nav("/login");
     } catch (err) {
-      setError(err.response?.data?.error || "" + (t("register.invalid_OTP") || "Mã OTP không hợp lệ"));
+      setError(
+        err.response?.data?.error ||
+          "" + (t("register.invalid_OTP") || "Mã OTP không hợp lệ"),
+      );
     }
   };
 
@@ -48,13 +54,18 @@ const Register = () => {
     nav("/login");
   };
 
+  const handleGithub = () => {
+    github_login();
+  };
+
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-b from-blue-100 to-white">
       <div className="w-full max-w-md p-6 mx-auto bg-white shadow-md rounded-xl">
-
         {/* ===== TITLE ===== */}
         <h2 className="mb-6 text-2xl font-bold text-center">
-          {step === "register" ? t("register.title") : t("register.invalid_OTP")}
+          {step === "register"
+            ? t("register.title")
+            : t("register.invalid_OTP")}
         </h2>
 
         {/* ===== ERROR ===== */}
@@ -67,7 +78,9 @@ const Register = () => {
           <>
             {/* Username */}
             <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium">{t("register.username")}</label>
+              <label className="block mb-1 text-sm font-medium">
+                {t("register.username")}
+              </label>
               <input
                 type="text"
                 placeholder={t("register.username")}
@@ -79,7 +92,9 @@ const Register = () => {
 
             {/* Email */}
             <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium">{t("register.email")}</label>
+              <label className="block mb-1 text-sm font-medium">
+                {t("register.email")}
+              </label>
               <input
                 type="email"
                 placeholder={t("register.email")}
@@ -91,7 +106,9 @@ const Register = () => {
 
             {/* Password */}
             <div className="mb-4">
-              <label className="block mb-1 text-sm font-medium">{t("register.password")}</label>
+              <label className="block mb-1 text-sm font-medium">
+                {t("register.password")}
+              </label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -122,12 +139,21 @@ const Register = () => {
               {t("register.register")}
             </button>
 
+            <button
+              onClick={handleGithub}
+              className="w-full mt-3 flex justify-center items-center gap-1 bg-black text-white py-2 rounded-lg hover:opacity-90 transition"
+            >
+              <GitHubIcon /> {t("login.login_with")} GitHub
+            </button>
+
             <p
               className="mt-4 text-sm text-center text-gray-500 cursor-pointer"
               onClick={handleLogin}
             >
               {t("register.have_account")}{" "}
-              <span className="text-blue-600 hover:underline">{t("register.login")}</span>
+              <span className="text-blue-600 hover:underline">
+                {t("register.login")}
+              </span>
             </p>
           </>
         )}
@@ -156,7 +182,7 @@ const Register = () => {
               disabled={otp.length !== 6}
               className="w-full py-2 text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
             >
-              {"Xác nhận OTP"}
+              {t("register.confirm_otp") || "Xác nhận OTP"}
             </button>
 
             <button

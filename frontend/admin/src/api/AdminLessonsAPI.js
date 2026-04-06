@@ -55,7 +55,7 @@ export async function fetchLessonDetail(slug) {
 
 /**
  * Tạo lesson mới
- * @param {Object} payload - Dữ liệu lesson {course, slug, order, parent}
+ * @param {Object} payload - Dữ liệu lesson {course, slug, order, parent, kind}
  * @returns {Promise} Lesson mới được tạo
  */
 export async function createLesson(payload) {
@@ -77,9 +77,9 @@ export async function createLesson(payload) {
 }
 
 /**
- * Cập nhật metadata của lesson (slug, order, course, parent)
+ * Cập nhật metadata của lesson (slug, order, course, parent, kind)
  * @param {string} slug - Slug của lesson
- * @param {Object} payload - Dữ liệu cần update {slug, order, course, parent}
+ * @param {Object} payload - Dữ liệu cần update {slug, order, course, parent, kind}
  * @returns {Promise} Lesson đã được update
  */
 export async function updateLessonMetadata(slug, payload) {
@@ -122,6 +122,76 @@ export async function upsertLessonTranslation(slug, payload) {
     }
 
     return res.json();
+}
+
+/**
+ * Upload image for lesson content
+ * @param {string} slug - Slug của lesson
+ * @param {File} file - File ảnh
+ * @returns {Promise} {url, path, content_type}
+ */
+export async function uploadLessonImage(slug, file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_BASE}/api/v1/admin/lessons/${slug}/upload-image/`, {
+        method: "POST",
+        headers: {
+            "Accept": "application/json",
+            ...getAuthHeaders(),
+        },
+        body: formData,
+    });
+
+    if (!res.ok) {
+        throw new Error(await parseError(res, "Lỗi upload ảnh"));
+    }
+
+    return res.json();
+}
+
+/**
+ * Lấy danh sách ảnh đã upload (group theo course)
+ * @param {Object} params - {course, limit, offset}
+ * @returns {Promise} {groups, limit, offset, count}
+ */
+export async function fetchLessonImages({ course, limit, offset } = {}) {
+    const params = new URLSearchParams();
+    if (course) params.set("course", course);
+    if (typeof limit === "number") params.set("limit", String(limit));
+    if (typeof offset === "number") params.set("offset", String(offset));
+
+    const query = params.toString();
+    const res = await fetch(`${API_BASE}/api/v1/admin/lessons/images/${query ? `?${query}` : ""}`, {
+        method: "GET",
+        headers: { Accept: "application/json", ...getAuthHeaders() },
+    });
+
+    if (!res.ok) {
+        throw new Error(await parseError(res, "Lỗi tải danh sách ảnh"));
+    }
+
+    return res.json();
+}
+
+/**
+ * Xóa ảnh đã upload
+ * @param {string} path - Full path in bucket (e.g. courses/<slug>/lessons/<id>/<file>)
+ * @returns {Promise}
+ */
+export async function deleteLessonImage(path) {
+    const params = new URLSearchParams();
+    params.set("path", path);
+    const res = await fetch(`${API_BASE}/api/v1/admin/lessons/images/delete/?${params.toString()}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json", ...getAuthHeaders() },
+    });
+
+    if (!res.ok) {
+        throw new Error(await parseError(res, "Lỗi xóa ảnh"));
+    }
+
+    return true;
 }
 
 /**

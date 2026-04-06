@@ -1,6 +1,7 @@
 import { FaRegEdit } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import {useAuth} from "../contexts/useAuth.jsx";
+import { useTranslation } from "react-i18next";
 
 
 const Info = ({ label, value }) => {
@@ -17,15 +18,16 @@ const Info = ({ label, value }) => {
 
 const ProfilePage = () => {
   const { user, loading } = useAuth();
+  const { t } = useTranslation("auth");
   
   if (loading) {
-    return <div className="text-center mt-20">Loading...</div>
+    return <div className="text-center mt-20">{t("profile.loading", "Đang tải...")}</div>
   }
   if (!user) {
-    return <div className="text-center mt-20">Chưa đăng nhập</div>
+    return <div className="text-center mt-20">{t("profile.not_logged_in", "Chưa đăng nhập")}</div>
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-white p-8">
+    <div className="min-h-screen bg-profile p-8">
       <div className="mx-auto max-w-4xl">
 
         {/* Profile Card */}
@@ -33,7 +35,7 @@ const ProfilePage = () => {
 
           {/* Username + Edit */}
           <h1 className="flex items-center justify-center gap-3 text-3xl font-bold">
-           Hi, {user.username} !
+           {t("profile.hi", "Hi, {{username}}!", { username: user.username })}
             <Link to="/profile/update">
               <FaRegEdit className="cursor-pointer text-gray-500 hover:text-blue-600 transition" />
             </Link>
@@ -44,7 +46,7 @@ const ProfilePage = () => {
 
           {/* Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
-            <Info label="Email" value={user.email} />
+            <Info label={t("profile.email", "Email")} value={user.email} />
             <Info label="Role" value={user.role} />
           </div>
         </div>

@@ -5,6 +5,7 @@ import DashboardPage from "../pages/DashboardPage";
 import AdminLessonListPage from "../pages/AdminLessonListPage";
 import AdminLessonDetailPage from "../pages/AdminLessonDetailPage";
 import AdminLessonEditPage from "../pages/AdminLessonEditPage";
+import AdminLessonImagesPage from "../pages/AdminLessonImagesPage";
 import AdminCourseCreatePage from "../pages/AdminCourseCreatePage";
 import AdminCourseDetailPage from "../pages/AdminCourseDetailPage";
 import LoginPage from "../pages/LoginPage";
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
           {
             path: "courses/new",
             element: <AdminCourseCreatePage />,
+          },
+          {
+            path: "lesson-images",
+            element: <AdminLessonImagesPage />,
           },
           {
             path: "courses/:id",

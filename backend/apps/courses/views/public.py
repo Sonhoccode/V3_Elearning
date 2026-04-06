@@ -1,6 +1,7 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.core.cache import cache  
 from rest_framework import status
 
 from ..models import Category, Course, Lesson, LessonTranslation
@@ -55,6 +56,12 @@ class LessonsByCategoryList(ReadOnlyModelViewSet):
         
         lang = request.GET.get("lang", "en")
         
+        # Kiểm tra cache
+        cache_key = f"lessons_list:{category}:lang={lang}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+        
         # Lấy tất cả lessons trong category này
         
         # Lấy category object
@@ -88,12 +95,73 @@ class LessonsByCategoryList(ReadOnlyModelViewSet):
                 "id": lesson.id,
                 "parent": lesson.parent_id,
                 "slug": lesson.slug,
+                "kind": lesson.kind,
                 "order": lesson.order,
                 "title": translation.title,
                 "short_description": translation.short_description,
                 "lang": translation.lang,
             })
-        
+            
+        # Lưu vào cache trước khi trả về
+        cache.set(cache_key, result, timeout=MENU_CACHE_TTL)
+        return Response(result)
+
+
+class LessonsByCourseList(ReadOnlyModelViewSet):
+    """
+    ViewSet cho danh sách lessons theo course (chỉ đọc)
+
+    GET /api/courses/<course>/lessons/?lang=en
+    Trả về: Danh sách lessons published trong course
+    """
+    permission_classes = [AllowAny]
+    queryset = Lesson.objects.none()
+
+    def list(self, request, course=None, *args, **kwargs):
+        # Lấy course từ URL kwargs nếu không có trong parameter
+        if course is None:
+            course = kwargs.get("course")
+
+        lang = request.GET.get("lang", "en")
+
+        # Kiểm tra cache
+        cache_key = f"lessons_by_course:{course}:lang={lang}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
+        try:
+            course_obj = Course.objects.get(slug=course, is_active=True)
+        except Course.DoesNotExist:
+            return Response([])
+
+        lessons = Lesson.objects.filter(
+            course=course_obj,
+            is_active=True
+        ).order_by("order")
+
+        result = []
+        for lesson in lessons:
+            try:
+                translation = lesson.translations.get(lang=lang, status="published")
+            except LessonTranslation.DoesNotExist:
+                try:
+                    translation = lesson.translations.get(lang="en", status="published")
+                except LessonTranslation.DoesNotExist:
+                    continue
+
+            result.append({
+                "id": lesson.id,
+                "parent": lesson.parent_id,
+                "slug": lesson.slug,
+                "kind": lesson.kind,
+                "order": lesson.order,
+                "title": translation.title,
+                "short_description": translation.short_description,
+                "lang": translation.lang,
+            })
+
+        cache.set(cache_key, result, timeout=MENU_CACHE_TTL)
         return Response(result)
 
 
@@ -110,6 +178,12 @@ class LessonDetailViewSet(ReadOnlyModelViewSet):
     
     def retrieve(self, request, slug=None, *args, **kwargs):
         lang = request.GET.get("lang", "en")
+
+        # Kiểm tra cache
+        cache_key = f"lesson_detail:{slug}:lang={lang}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
         
         try:
             lesson = Lesson.objects.get(slug=slug)
@@ -131,7 +205,9 @@ class LessonDetailViewSet(ReadOnlyModelViewSet):
         
         data = {
             "slug": lesson.slug,
+            "kind": lesson.kind,
             "order": lesson.order,
+            "kind": lesson.kind,
             "lang": lang,
             "translation": {
                 "lang": translation.lang if translation else None,
@@ -140,5 +216,7 @@ class LessonDetailViewSet(ReadOnlyModelViewSet):
                 "content": translation.content if translation else None,
             },
         }
-        
+
+        # Lưu cache
+        cache.set(cache_key, data, timeout=MENU_CACHE_TTL)
         return Response(data)

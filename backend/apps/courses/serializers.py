@@ -42,13 +42,12 @@ class AdminLessonDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ("id", "course", "parent", "slug", "order", "is_active", "translations")
+        fields = ("id", "course", "parent", "slug", "kind", "order", "is_active", "translations")
 
 
 class AdminLessonWriteSerializer(serializers.ModelSerializer):
     # Serializer cho admin - ghi (tạo/sửa) lesson
     class Meta:
         model = Lesson
-        fields = ("id", "course", "parent", "slug", "order", "is_active")
-
+        fields = ("id", "course", "parent", "slug", "kind", "order", "is_active")
 

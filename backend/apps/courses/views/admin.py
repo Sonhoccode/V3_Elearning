@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.core.cache import cache
 
 from ..models import Category, Course, Lesson, LessonTranslation
 from ..serializers import (
@@ -11,6 +12,24 @@ from ..serializers import (
 )
 from ..cache_utils import bump_menu_version
 from apps.Common.permissions import IsAdminRole
+
+LESSON_CACHE_LANGS = ["vi", "en"]
+
+
+def _invalidate_lesson_cache(*, course_slug=None, category_slug=None, lesson_slugs=None, langs=None):
+    langs = langs or LESSON_CACHE_LANGS
+    if lesson_slugs is None:
+        lesson_slugs = []
+    if isinstance(lesson_slugs, str):
+        lesson_slugs = [lesson_slugs]
+
+    for lang in langs:
+        if course_slug:
+            cache.delete(f"lessons_by_course:{course_slug}:lang={lang}")
+        if category_slug:
+            cache.delete(f"lessons_list:{category_slug}:lang={lang}")
+        for lesson_slug in lesson_slugs:
+            cache.delete(f"lesson_detail:{lesson_slug}:lang={lang}")
 
 # ========== ADMIN APIs - FULL CRUD ==========
 
@@ -34,17 +53,24 @@ class AdminLessonViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         """
         POST: Tạo lesson mới
-        Body: {"course": <course_id>, "slug": "...", "order": 0}
+        Body: {"course": <course_id>, "slug": "...", "order": 0, "kind": "lesson|group"}
         """
         course_id = request.data.get("course")
         slug = request.data.get("slug")
         order = request.data.get("order", 0)
         parent_id = request.data.get("parent", None)
+        kind = request.data.get("kind", "lesson")
         
         # Validate required fields
         if not course_id or not slug:
             return Response(
                 {"detail": "course và slug là bắt buộc"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if kind not in ["lesson", "group"]:
+            return Response(
+                {"detail": "kind phải là 'lesson' hoặc 'group'"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
@@ -68,7 +94,8 @@ class AdminLessonViewSet(ModelViewSet):
         lesson_data = {
             "course": course,
             "slug": slug,
-            "order": order
+            "order": order,
+            "kind": kind if kind in ["lesson", "group"] else "lesson",
         }
         
         if parent_id:
@@ -79,6 +106,10 @@ class AdminLessonViewSet(ModelViewSet):
                 pass
         
         lesson = Lesson.objects.create(**lesson_data)
+        _invalidate_lesson_cache(
+            course_slug=course.slug,
+            category_slug=course.category.slug,
+        )
         serializer = self.get_serializer(lesson)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
@@ -86,7 +117,7 @@ class AdminLessonViewSet(ModelViewSet):
     def update_metadata(self, request, slug=None):
         """
         PATCH: Cập nhật metadata của lesson (slug, order, course, parent)
-        Body: {"slug": "...", "order": 0, "course": <id>, "parent": <id>}
+        Body: {"slug": "...", "order": 0, "course": <id>, "parent": <id>, "kind": "lesson"|"group"}
         """
         try:
             lesson = self.get_object()
@@ -101,7 +132,9 @@ class AdminLessonViewSet(ModelViewSet):
         new_order = request.data.get("order")
         new_course_id = request.data.get("course")
         new_parent_id = request.data.get("parent")
+        new_kind = request.data.get("kind")
         
+        old_slug = lesson.slug
         if new_slug and new_slug != slug:
             # Kiểm tra slug mới đã tồn tại chưa
             if Lesson.objects.filter(course=lesson.course, slug=new_slug).exclude(id=lesson.id).exists():
@@ -113,6 +146,9 @@ class AdminLessonViewSet(ModelViewSet):
         
         if new_order is not None:
             lesson.order = new_order
+
+        if new_kind in ["lesson", "group"]:
+            lesson.kind = new_kind
         
         if new_course_id:
             try:
@@ -122,8 +158,16 @@ class AdminLessonViewSet(ModelViewSet):
                 return Response(
                     {"detail": "Course not found"},
                     status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+        if new_kind is not None:
+            if new_kind not in ["lesson", "group"]:
+                return Response(
+                    {"detail": "kind phải là 'lesson' hoặc 'group'"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-        
+            lesson.kind = new_kind
+
         if "parent" in request.data:
             new_parent_id = request.data["parent"]
             if new_parent_id in [None, ""]:
@@ -142,6 +186,11 @@ class AdminLessonViewSet(ModelViewSet):
                     )
         
         lesson.save()
+        _invalidate_lesson_cache(
+            course_slug=lesson.course.slug,
+            category_slug=lesson.course.category.slug,
+            lesson_slugs=[old_slug, lesson.slug],
+        )
         
         serializer = self.get_serializer(lesson)
         return Response(serializer.data)
@@ -194,6 +243,11 @@ class AdminLessonViewSet(ModelViewSet):
         
         if serializer.is_valid():
             obj = serializer.save(lesson=lesson)
+            _invalidate_lesson_cache(
+                course_slug=lesson.course.slug,
+                category_slug=lesson.course.category.slug,
+                lesson_slugs=lesson.slug,
+            )
             return Response(AdminLessonTranslationSerializer(obj).data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -211,7 +265,15 @@ class AdminLessonViewSet(ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
+        lesson_slug = lesson.slug
+        course_slug = lesson.course.slug
+        category_slug = lesson.course.category.slug
         lesson.delete()
+        _invalidate_lesson_cache(
+            course_slug=course_slug,
+            category_slug=category_slug,
+            lesson_slugs=lesson_slug,
+        )
         return Response(
             {"detail": "Lesson deleted successfully"}, 
             status=status.HTTP_204_NO_CONTENT

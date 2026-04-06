@@ -12,7 +12,7 @@ export default function AuthItems() {
   const [openUser, setOpenUser] = useState(false);
   const { isAuthenticated, user, logout_user } = useAuth();
 
-  const {t} = useTranslation("common");
+  const { t } = useTranslation("common");
 
   useEffect(() => {
     const onDocClick = (e) => {
@@ -73,17 +73,14 @@ export default function AuthItems() {
                     </span>
                   </NavLink>
                 </div>
+                <button onClick={logout_user} className="block w-full px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+                  {t("Logout")}
+                </button>
               </aside>
             )}
           </div>
-
-          <span className="text-gray-400">|</span>
-
-          <button onClick={logout_user} className="hover:text-red-500">
-            {t("Logout")}
-          </button>
         </>
       )}
     </div>
   );
-};
+}

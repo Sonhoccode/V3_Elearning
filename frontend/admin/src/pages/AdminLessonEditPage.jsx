@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchLessonDetail, fetchLessons, upsertLessonTranslation, updateLessonMetadata } from "../api/AdminLessonsAPI";
+import { fetchLessonDetail, fetchLessons, upsertLessonTranslation, updateLessonMetadata, uploadLessonImage } from "../api/AdminLessonsAPI";
 import { useQueryClient } from "@tanstack/react-query";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
@@ -28,13 +28,23 @@ export default function AdminLessonEditPage() {
     slug: "",
     order: 0,
     parent: "",
+    kind: "lesson",
   });
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadAlt, setUploadAlt] = useState("");
+  const [uploadUrl, setUploadUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
 
   const [parentOptions, setParentOptions] = useState([]);
+  const contentRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Load lesson + all translations
   useEffect(() => {
@@ -53,7 +63,9 @@ export default function AdminLessonEditPage() {
         slug: res.slug,
         order: res.order,
         parent: res.parent || "",
+        kind: res.kind || "lesson",
         course: res.course,
+        kind: res.kind || "lesson",
       });
 
       // Fetch all lessons to populate Parent Options
@@ -114,6 +126,64 @@ export default function AdminLessonEditPage() {
   };
 
   const queryClient = useQueryClient();
+  
+  const openUploadModal = () => {
+    setUploadFile(null);
+    setUploadAlt("");
+    setUploadUrl("");
+    setUploadError("");
+    setIsUploadOpen(true);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const closeUploadModal = () => {
+    setIsUploadOpen(false);
+    setUploadFile(null);
+    setUploadAlt("");
+    setUploadUrl("");
+    setUploadError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const escapeHtml = (value) => {
+    return (value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/"/g, "&quot;");
+  };
+
+  const buildImageTag = (url, altText) => {
+    const safeAlt = escapeHtml((altText || "").trim());
+    return `\n<img src="${url}" alt="${safeAlt}" loading="lazy" />\n`;
+  };
+
+  const imageTag = uploadUrl ? buildImageTag(uploadUrl, uploadAlt).trim() : "";
+
+  const insertAtCursor = (text) => {
+    const el = contentRef.current;
+    if (!el) {
+      setForm((prev) => ({ ...prev, content: `${prev.content}${text}` }));
+      return;
+    }
+
+    const start = el.selectionStart ?? 0;
+    const end = el.selectionEnd ?? 0;
+    setForm((prev) => {
+      const next =
+        prev.content.slice(0, start) + text + prev.content.slice(end);
+      return { ...prev, content: next };
+    });
+
+    requestAnimationFrame(() => {
+      el.focus();
+      const pos = start + text.length;
+      el.setSelectionRange(pos, pos);
+    });
+  };
 
   const handleSaveMetadata = async () => {
     setSaving(true);
@@ -172,6 +242,42 @@ export default function AdminLessonEditPage() {
     }
   };
 
+  const handleUploadImage = async () => {
+    if (!uploadFile) {
+      setUploadError("Vui lòng chọn file ảnh");
+      return;
+    }
+
+    setUploadLoading(true);
+    setUploadError("");
+    try {
+      const res = await uploadLessonImage(slug, uploadFile);
+      setUploadUrl(res.url || "");
+    } catch (err) {
+      setUploadError(err.message || "Upload ảnh thất bại");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
+  const handleInsertImage = () => {
+    if (!uploadUrl) return;
+    insertAtCursor(buildImageTag(uploadUrl, uploadAlt));
+    closeUploadModal();
+  };
+
+  const handleCopyImageTag = async () => {
+    if (!imageTag) return;
+    try {
+      await navigator.clipboard.writeText(imageTag);
+      setCopyMessage("Đã copy thẻ img");
+      setTimeout(() => setCopyMessage(""), 1500);
+    } catch (err) {
+      setCopyMessage("Không thể copy thẻ img");
+      setTimeout(() => setCopyMessage(""), 1500);
+    }
+  };
+
   if (loading) return <div className="p-6 text-center text-gray-500">Đang tải dữ liệu bài học...</div>;
 
   if (!lesson) {
@@ -208,12 +314,35 @@ export default function AdminLessonEditPage() {
                 value={metadataForm.slug}
                 onChange={(e) => setMetadataForm(prev => ({...prev, slug: e.target.value}))}
             />
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Loại bài học</label>
+                <select
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-[var(--color-border)]"
+                    value={metadataForm.kind || "lesson"}
+                    onChange={(e) => setMetadataForm(prev => ({...prev, kind: e.target.value}))}
+                >
+                    <option value="lesson">Bài học (Lesson)</option>
+                    <option value="group">Nhóm (Group)</option>
+                </select>
+            </div>
             <Input
                 label="Thứ tự (Order)"
                 type="number"
                 value={metadataForm.order}
                 onChange={(e) => setMetadataForm(prev => ({...prev, order: parseInt(e.target.value)}))}
             />
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Loại bài</label>
+                <select
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border border-[var(--color-border)]"
+                    value={metadataForm.kind || "lesson"}
+                    onChange={(e) => setMetadataForm(prev => ({...prev, kind: e.target.value}))}
+                >
+                    <option value="lesson">Lesson</option>
+                    <option value="group">Group</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Group dùng để gom nhóm, Lesson là bài học thực.</p>
+            </div>
              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bài học cha (Parent)</label>
                 <select
@@ -266,6 +395,7 @@ export default function AdminLessonEditPage() {
             label={`Tiêu đề (${lang})`}
             value={form.title}
             onChange={(e) => handleChangeField("title", e.target.value)}
+            className="border-black border-2 p-3"
           />
 
           <div>
@@ -273,16 +403,22 @@ export default function AdminLessonEditPage() {
             <textarea
               value={form.short_description}
               onChange={(e) => handleChangeField("short_description", e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-24 p-3 border-[var(--color-border)]"
+              className="block w-full rounded-md border-black border-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-24 p-3 border-[var(--color-border)]"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nội dung (HTML/Markdown)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Nội dung (HTML/Markdown)</label>
+              <Button type="button" variant="secondary" size="sm" onClick={openUploadModal}>
+                Upload ảnh
+              </Button>
+            </div>
             <textarea
+              ref={contentRef}
               value={form.content}
               onChange={(e) => handleChangeField("content", e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-sm h-96 p-3 border-[var(--color-border)]"
+              className="block w-full rounded-md border-black border-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-sm h-96 p-3 border-[var(--color-border)]"
             />
           </div>
 
@@ -291,7 +427,7 @@ export default function AdminLessonEditPage() {
             <select
               value={form.status}
               onChange={(e) => handleChangeField("status", e.target.value)}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border-[var(--color-border)]"
+              className="block w-full rounded-md border-black border-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border-[var(--color-border)]"
             >
               <option value="draft">Nháp (Draft)</option>
               <option value="published">Đã xuất bản (Published)</option>
@@ -310,6 +446,108 @@ export default function AdminLessonEditPage() {
           </div>
         </div>
       </div>
+
+      {isUploadOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-lg bg-white shadow-lg">
+            <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-3">
+              <h4 className="text-lg font-semibold text-gray-800">Upload ảnh</h4>
+              <button
+                type="button"
+                onClick={closeUploadModal}
+                className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Chọn file ảnh</label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setUploadFile(file);
+                    setUploadUrl("");
+                    setUploadError("");
+                  }}
+                  className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+                />
+              </div>
+
+              <Input
+                label="Alt text (tùy chọn)"
+                value={uploadAlt}
+                onChange={(e) => setUploadAlt(e.target.value)}
+              />
+
+              {uploadError && (
+                <p className="text-sm text-red-600">{uploadError}</p>
+              )}
+
+              {uploadUrl && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Link ảnh</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={uploadUrl}
+                    className="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2 border-[var(--color-border)] bg-gray-50 text-gray-700"
+                  />
+                </div>
+              )}
+
+              {uploadUrl && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Thẻ img</label>
+                  <textarea
+                    readOnly
+                    rows={3}
+                    value={imageTag}
+                    className="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2 border-[var(--color-border)] bg-gray-50 text-gray-700 font-mono"
+                  />
+                  <div className="mt-2 flex items-center gap-3">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleCopyImageTag}
+                    >
+                      Copy thẻ img
+                    </Button>
+                    {copyMessage && (
+                      <span className="text-sm text-gray-600">{copyMessage}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 border-t border-[var(--color-border)] px-5 py-3">
+              <Button type="button" variant="secondary" onClick={closeUploadModal}>
+                Đóng
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!uploadUrl}
+                onClick={handleInsertImage}
+              >
+                Chèn vào nội dung
+              </Button>
+              <Button
+                type="button"
+                onClick={handleUploadImage}
+                isLoading={uploadLoading}
+                disabled={!uploadFile}
+              >
+                Upload
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

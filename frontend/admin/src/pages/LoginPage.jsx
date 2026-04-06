@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/auth.store";
 import Input from "../components/ui/Input"; 
 import Button from "../components/ui/Button";
+import { decodeTokenPayload } from "../utils/jwt";
 
 
 
@@ -29,15 +30,18 @@ export default function LoginPage() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isAuthenticated, error, isLoading } = useAuthStore();
+  const { login, isAuthenticated, error, isLoading, user } = useAuthStore();
   
   const from = location.state?.from?.pathname || "/";
+  const storedToken = localStorage.getItem("access_token");
+  const tokenPayload = storedToken ? decodeTokenPayload(storedToken) : null;
+  const role = user?.role || tokenPayload?.role;
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && role === "admin") {
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, role, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

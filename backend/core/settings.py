@@ -25,14 +25,18 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
 
-    # Local apps
-    "apps.health",
+
     # khoa hoc
     "apps.courses.apps.CoursesConfig",
+    # classes
+    "apps.classes.apps.ClassesConfig",
     # common
     "apps.Common.apps.CommonConfig",
     # User
     "apps.User.apps.UserConfig",
+    # AI Chatbot
+    "apps.ai.apps.AiConfig",
+    "apps.chat.apps.ChatConfig",
 ]
 
 MIDDLEWARE = [
@@ -77,7 +81,11 @@ ROOT_URLCONF = "core.urls"
 #     }
 # }
 
-REDIS_URL = os.getenv("REDIS_URL", "").strip()  
+REDIS_URL = os.getenv(
+    "REDIS_URL",
+    "redis://localhost:6379/1"
+).strip()
+
 
 if REDIS_URL:
     CACHES = {
