@@ -8,7 +8,7 @@ from supabase import create_client, Client
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from .config import DATA_FOLDER_PATH, EMBEDDING_MODEL_NAME
 
@@ -143,28 +143,14 @@ def load_and_split_documents():
 # Embedding Model
 # =========================
 
-def _ensure_hf_token():
-    token = os.getenv("HF_TOKEN")
-    if token and not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
-        os.environ["HUGGINGFACEHUB_API_TOKEN"] = token
-
-
 def get_embedding_model():
-    _ensure_hf_token()
     try:
-        return HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
+        return GoogleGenerativeAIEmbeddings(
+            model=EMBEDDING_MODEL_NAME,
         )
     except Exception as exc:
-        fallback_model = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-        print(f"⚠ Embedding model error: {exc}. Fallback to {fallback_model}")
-        return HuggingFaceEmbeddings(
-            model_name=fallback_model,
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+        print(f"⚠ Google Embedding model error: {exc}")
+        raise exc
 
 
 # =========================
