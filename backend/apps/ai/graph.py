@@ -100,7 +100,8 @@ def create_internal_node():
             for doc in top_docs:
                 content = doc.get("content", "")
                 meta = doc.get("metadata", {})
-                source = meta.get("source", "Không rõ nguồn").split("\\")[-1].split("/")[-1] # Lấy tên file cuôi
+                source = meta.get("display_name") or meta.get("source", "Không rõ nguồn")
+                source = source.split("\\")[-1].split("/")[-1]  # Lấy tên file cuối
                 page = meta.get("page")
 
                 if page is not None:
@@ -131,7 +132,8 @@ def create_internal_node():
                 for row in section_rows.data:
                     content = row["content"]
                     meta = row.get("metadata", {})
-                    source = meta.get("source", "Không rõ nguồn").split("\\")[-1].split("/")[-1]
+                    source = meta.get("display_name") or meta.get("source", "Không rõ nguồn")
+                    source = source.split("\\")[-1].split("/")[-1]
                     source_str = f"[Nguồn: {source}]"
                     context_parts.append(f"{content}\n{source_str}")
                 

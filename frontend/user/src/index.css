@@ -85,5 +85,44 @@
   .prose .example-box .btn-try {
     @apply inline-block bg-[#04AA6D] text-white px-5 py-2 rounded text-base font-bold hover:bg-[#059862] transition shadow-sm no-underline;
   }
-}
 
+  .chat-prose :where(p, ul, ol, pre) {
+    @apply my-2;
+  }
+
+  .chat-prose {
+    @apply text-[0.95rem] leading-relaxed;
+  }
+
+  .chat-prose h1 {
+    @apply mb-2 mt-3 text-base font-semibold text-slate-900;
+  }
+
+  .chat-prose h2 {
+    @apply mb-2 mt-3 text-sm font-semibold text-slate-900;
+  }
+
+  .chat-prose h3 {
+    @apply mb-2 mt-3 text-sm font-semibold text-slate-800;
+  }
+
+  .chat-prose blockquote {
+    @apply border-l-2 border-slate-200 pl-3 text-slate-600;
+  }
+
+  .chat-prose hr {
+    @apply my-3 border-slate-200;
+  }
+
+  .chat-prose strong {
+    @apply text-slate-900;
+  }
+
+  .chat-prose .chat-pre {
+    @apply mt-2 rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-100 overflow-x-auto;
+  }
+
+  .chat-prose code {
+    @apply bg-slate-100 text-slate-800;
+  }
+}

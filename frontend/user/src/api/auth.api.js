@@ -38,7 +38,14 @@ export const login = async (email, password) => {
     { withCredentials: true }
   );
 
-  // ✅ backend của bạn trả { success: true, user: {...role...} }
+  // ✅ backend của bạn trả { success: true, access, refresh, user: {...role...} }
+  if (response.data?.access) {
+    localStorage.setItem("access_token", response.data.access);
+  }
+  if (response.data?.refresh) {
+    localStorage.setItem("refresh_token", response.data.refresh);
+  }
+
   return response.data; 
 };
 
@@ -55,6 +62,8 @@ export const refresh_token = async () => {
 export const logout = async () => {
   try {
     await axios.post(LOGOUT_URL, {}, { withCredentials: true });
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     return true;
   } catch (error) {
     console.error("Logout failed:", error);

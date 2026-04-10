@@ -51,6 +51,21 @@ export default function Sidebar() {
             </div>
         </NavLink>
 
+        <NavLink
+            to="/internal-docs"
+            className={({ isActive }) =>
+            `block w-full px-4 py-3 rounded-lg text-left text-base font-medium transition-all duration-300 ${
+                isActive
+                ? "bg-[var(--color-bg-tertiary)] text-[var(--color-text-primary)] font-semibold shadow-sm"
+                : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]"
+            }`
+            }
+        >
+            <div className="flex items-center gap-3">
+                <span>Tài liệu nội bộ</span>
+            </div>
+        </NavLink>
+
         {/* Dropdown Menu for Courses */}
         <div className="mt-2">
             <button
