@@ -3,6 +3,8 @@
 import { NavLink } from "react-router-dom";
 import logo from "../assets/logo_full.svg";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -16,6 +18,7 @@ import AuthItems from "./items/AuthItems.jsx";
 export default function Header() {
   const { t } = useTranslation("common");
   const [openSlug, setOpenSlug] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Lay danh mục và khóa học
   const {
@@ -60,44 +63,40 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="site-header w-full flex flex-col items-center">
+    <header className="relative z-50 flex flex-col items-center w-full site-header">
       <div className="w-full bg-white shadow-md">
-        <div className="header-top w-[90%] max-w-screen-3xl mx-auto h-14 flex items-center gap-4 overflow-visible">
-          <NavLink to="/" className="h-full flex items-center mr-4">
-            <img src={logo} alt="Logo" className="h-10 w-auto block" />
+        <div className="header-top w-[95%] md:w-[90%] max-w-screen-3xl mx-auto h-16 flex items-center justify-between overflow-visible">
+          {/* Logo Area */}
+          <NavLink to="/" className="flex items-center flex-shrink-0 h-full mr-0 lg:mr-4" onClick={() => setMobileMenuOpen(false)}>
+            <img src={logo} alt="Logo" className="block w-auto h-8 md:h-10" />
           </NavLink>
 
-          {/* drop menu categories */}
-          <div className="flex items-center">
-            {categoriesLoading && (
-              <div className="flex items-center">
-                <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  Language <ArrowDropDownIcon />
-                </span>
-                <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  Framework <ArrowDropDownIcon />
-                </span>
-                <span className="text-lg flex items-center gap-1 px-4 py-4 transition-all text-gray-700 hover:bg-[#FFCCCC] font-bold">
-                  Database <ArrowDropDownIcon />
-                </span>
-              </div>
-            )}
-            {/* Error */}
-            {categoriesError && (
-              <div className="text-red-500 text-sm">
-                <h1>{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</h1>
-              </div>
-            )}
+          {/* Desktop Nav Actions */}
+          <div className="items-center justify-between flex-1 hidden ml-4 xl:flex">
+            {/* drop menu categories */}
+            <div className="flex flex-wrap items-center">
+              {categoriesLoading && (
+                <div className="flex items-center">
+                  <span className="flex items-center gap-1 px-2 py-4 text-base font-bold text-gray-700 md:text-lg md:px-4">
+                    Language <ArrowDropDownIcon />
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-4 text-base font-bold text-gray-700 md:text-lg md:px-4">
+                    Framework <ArrowDropDownIcon />
+                  </span>
+                </div>
+              )}
+              {categoriesError && (
+                <div className="px-4 text-sm text-red-500">
+                  {t("header.system_error", "Hệ thống lỗi")}
+                </div>
+              )}
 
-            {/* Thành công */}
-            {!categoriesLoading &&
-              !categoriesError &&
-              categories.map((cat) => (
+              {!categoriesLoading && !categoriesError && categories.map((cat) => (
                 <div key={cat.id} className="relative" data-cat-menu>
                   <button
                     onClick={() => toggle(cat.slug)}
                     type="button"
-                    className={`text-lg flex items-center gap-1 px-4 py-4 transition-all ${
+                    className={`text-base md:text-lg flex items-center gap-1 px-2 md:px-4 py-4 transition-all whitespace-nowrap ${
                       openSlug === cat.slug
                         ? "text-gray-700 bg-[#FFCCCC] font-bold"
                         : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
@@ -105,118 +104,153 @@ export default function Header() {
                   >
                     {cat.name}
                     <ArrowDropDownIcon
-                      className={
-                        openSlug === cat.slug
-                          ? "rotate-180 transition-transform"
-                          : "transition-transform"
-                      }
+                      className={openSlug === cat.slug ? "rotate-180 transition-transform" : "transition-transform"}
                     />
                   </button>
-                  
-                  {/* Drop menu */}
                   {openSlug === cat.slug && (
-                    <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
+                    <aside className="absolute top-full left-0 mt-2 bg-white shadow-xl rounded-md min-w-[200px] py-2 z-50 border border-gray-100">
                       {cat.courses?.length ? (
                         cat.courses.map((item) => (
-                          <NavLink
-                            key={item.id}
-                            to={`/courses/${item.slug}`}
-                            className="block px-3 py-2 hover:bg-gray-100 rounded"
-                            onClick={() => setOpenSlug(null)}
-                          >
+                           <NavLink key={item.id} to={`/courses/${item.slug}`} className="block px-4 py-3 hover:bg-[#FFCCCC] transition-colors rounded mx-1" onClick={() => setOpenSlug(null)}>
                             {item.title}
-                          </NavLink>
+                           </NavLink>
                         ))
                       ) : (
-                        <div className="px-3 py-2 text-gray-500">No items</div>
+                        <div className="px-4 py-3 text-gray-500">No items</div>
                       )}
                     </aside>
                   )}
                 </div>
               ))}
 
-            <div className="relative" data-cat-menu>
-              <button
-                onClick={() => toggle("more")}
-                type="button"
-                className={`text-lg flex items-center gap-1 px-4 py-4 transition-all ${
-                  openSlug === "more"
-                    ? "text-gray-700 bg-[#FFCCCC] font-bold"
-                    : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
-                }`}
-              >
-                {t("header.more", "Thêm")}
-                <ArrowDropDownIcon
-                  className={
+              <div className="relative" data-cat-menu>
+                <button
+                  onClick={() => toggle("more")}
+                  type="button"
+                  className={`text-base md:text-lg flex items-center gap-1 px-2 md:px-4 py-4 transition-all whitespace-nowrap ${
                     openSlug === "more"
-                      ? "rotate-180 transition-transform"
-                      : "transition-transform"
-                  }
-                />
-              </button>
+                      ? "text-gray-700 bg-[#FFCCCC] font-bold"
+                      : "text-gray-700 hover:bg-[#FFCCCC] font-bold"
+                  }`}
+                >
+                  {t("header.more", "Thêm")}
+                  <ArrowDropDownIcon
+                    className={openSlug === "more" ? "rotate-180 transition-transform" : "transition-transform"}
+                  />
+                </button>
+                {openSlug === "more" && (
+                  <aside className="absolute top-full left-0 mt-2 bg-white shadow-xl rounded-md min-w-[200px] py-2 z-50 border border-gray-100">
+                    <NavLink to="/classes" className="block px-4 py-3 hover:bg-[#FFCCCC] transition-colors rounded mx-1" onClick={() => setOpenSlug(null)}>
+                      {t("header.classes", "Lớp học")}
+                    </NavLink>
+                    <NavLink to="/playground" className="block px-4 py-3 hover:bg-[#FFCCCC] transition-colors rounded mx-1" onClick={() => setOpenSlug(null)}>
+                      {t("header.editor_code", "Editor Code")}
+                    </NavLink>
+                  </aside>
+                )}
+              </div>
+            </div>
 
-              {openSlug === "more" && (
-                <aside className="absolute top-full left-0 mt-2 bg-white shadow-md rounded-md min-w-[180px] p-2 z-50">
-                  <NavLink
-                    to="/classes"
-                    className="block px-3 py-2 hover:bg-gray-100 rounded"
-                    onClick={() => setOpenSlug(null)}
-                  >
-                    {t("header.classes", "Lớp học")}
-                  </NavLink>
-                  <NavLink
-                    to="/playground"
-                    className="block px-3 py-2 hover:bg-gray-100 rounded"
-                    onClick={() => setOpenSlug(null)}
-                  >
-                    {t("header.editor_code", "Editor Code")}
-                  </NavLink>
-                </aside>
-              )}
+            {/* Language & Auth */}
+            <div className="flex items-center gap-4">
+              <DropLanguage />
+              <AuthItems />
             </div>
           </div>
 
-          {/* drop menu language */}
-          <DropLanguage />
-
-          {/* auth items */}
-          <div className="ml-4">
-            <AuthItems />
+          {/* Mobile Hamburger Button */}
+          <div className="flex items-center gap-4 xl:hidden">
+             <div className="scale-90"><DropLanguage /></div>
+             <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-teal-600 transition-colors rounded-lg bg-teal-50 hover:bg-teal-100"
+                aria-label="Toggle mobile menu"
+             >
+                {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+             </button>
           </div>
         </div>
       </div>
 
-      {/* Header Bottom */}
-      <div className="w-full h-14 bg-gray-100 ">
-        {coursesLoading && (
-          <div className="h-full flex items-center justify-center">
-            <span className="loader"></span>
-          </div>
-        )}
+      {/* Mobile Drawer Navigation (Hidden on Large Screens) */}
+      <div 
+        className={`fixed top-16 left-0 w-full h-[calc(100vh-4rem)] bg-white transform transition-transform duration-300 xl:hidden z-40 overflow-y-auto ${
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+         <div className="flex flex-col gap-6 p-6">
+            <div className="pb-4 border-b border-gray-100">
+               <h3 className="mb-4 text-sm font-bold tracking-wider text-gray-500 uppercase">Danh mục</h3>
+               <div className="flex flex-col gap-2">
+                 {!categoriesLoading && !categoriesError && categories.map((cat) => (
+                    <div key={cat.id} className="flex flex-col pb-2 border-b border-gray-50">
+                       <button onClick={() => toggle(cat.slug)} className="flex items-center justify-between w-full py-2 font-bold text-left text-gray-700">
+                          {cat.name}
+                          <ArrowDropDownIcon className={openSlug === cat.slug ? "rotate-180" : ""} />
+                       </button>
+                       {openSlug === cat.slug && (
+                         <div className="flex flex-col gap-2 pl-4 mt-2">
+                            {cat.courses?.map((item) => (
+                               <NavLink key={item.id} to={`/courses/${item.slug}`} onClick={() => setMobileMenuOpen(false)} className="py-2 text-gray-600">
+                                 {item.title}
+                               </NavLink>
+                            ))}
+                         </div>
+                       )}
+                    </div>
+                 ))}
+                 
+                 <div className="flex flex-col pt-2">
+                    <button onClick={() => toggle("more")} className="flex items-center justify-between w-full py-2 font-bold text-left text-gray-700">
+                        {t("header.more", "Thêm")}
+                        <ArrowDropDownIcon className={openSlug === "more" ? "rotate-180" : ""} />
+                    </button>
+                    {openSlug === "more" && (
+                         <div className="flex flex-col gap-2 pl-4 mt-2">
+                            <NavLink to="/classes" onClick={() => setMobileMenuOpen(false)} className="py-2 text-gray-600">
+                               {t("header.classes", "Lớp học")}
+                            </NavLink>
+                            <NavLink to="/playground" onClick={() => setMobileMenuOpen(false)} className="py-2 text-gray-600">
+                               {t("header.editor_code", "Editor Code")}
+                            </NavLink>
+                         </div>
+                    )}
+                 </div>
+               </div>
+            </div>
 
-        {coursesError && <div className="text-red-500 text-sm">{t("header.system_error", "Hệ thống đang gặp sự cố, vui lòng thử lại sau.")}</div>}
+            <div className="pb-4 border-b border-gray-100">
+              <h3 className="mb-4 text-sm font-bold tracking-wider text-gray-500 uppercase">Tài khoản</h3>
+              <div onClick={() => setMobileMenuOpen(false)}>
+                 <AuthItems />
+              </div>
+            </div>
+         </div>
+      </div>
 
-        {!coursesLoading && !coursesError && (
-          <nav className="flex flex-wrap justify-center ">
-            {courses?.length > 0 ? (
-              courses.map((course) => (
-                <NavLink
-                  key={course.id}
-                  to={`/courses/${course.slug}`}
-                  className={({ isActive }) =>
-                    `item-courses w-32 py-4 text-center font-semibold transition-colors ${
-                      isActive
-                        ? "bg-teal-500 text-white hover:bg-teal-400"
-                        : "text-gray-700 hover:bg-teal-500 hover:text-white "
-                    }`
-                  }
-                >
-                  {course.title}
-                </NavLink>
-              ))
-            ) : (
-              <div className="px-3 py-2 text-gray-500">No items</div>
-            )}
+      {/* Header Bottom (Desktop Courses Shortcut) - Hidden on Mobile */}
+      <div className="items-center justify-center hidden w-full bg-gray-100 border-t border-gray-200 h-14 xl:flex">
+        {coursesLoading ? (
+           <span className="scale-50 loader"></span>
+        ) : coursesError ? (
+           <div className="text-sm text-red-500">{t("header.system_error")}</div>
+        ) : (
+          <nav className="flex flex-wrap justify-center overflow-hidden">
+            {courses?.length > 0 && courses.map((course) => (
+              <NavLink
+                key={course.id}
+                to={`/courses/${course.slug}`}
+                className={({ isActive }) =>
+                  `item-courses px-6 py-4 text-center font-semibold transition-colors text-sm ${
+                    isActive
+                      ? "bg-teal-500 text-white"
+                      : "text-gray-700 hover:bg-teal-500 hover:text-white"
+                  }`
+                }
+              >
+                {course.title}
+              </NavLink>
+            ))}
           </nav>
         )}
       </div>

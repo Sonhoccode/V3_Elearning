@@ -1,9 +1,15 @@
+import os
+import uuid
+from pathlib import Path
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.cache import cache
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 from ..models import Category, Course, Lesson, LessonTranslation
 from ..serializers import (
@@ -49,6 +55,7 @@ class AdminLessonViewSet(ModelViewSet):
     serializer_class = AdminLessonDetailSerializer
     lookup_field = 'slug'
     permission_classes = [IsAuthenticated, IsAdminRole]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     
     def create(self, request, *args, **kwargs):
         """
@@ -278,6 +285,150 @@ class AdminLessonViewSet(ModelViewSet):
             {"detail": "Lesson deleted successfully"}, 
             status=status.HTTP_204_NO_CONTENT
         )
+
+    @action(detail=True, methods=['post'], url_path='upload-image')
+    def upload_image(self, request, slug=None):
+        lesson = self.get_object()
+        file_obj = request.FILES.get("file")
+        if not file_obj:
+            return Response({"detail": "Vui lòng chọn file ảnh."}, status=status.HTTP_400_BAD_REQUEST)
+
+        content_type = (file_obj.content_type or "").lower()
+        if not content_type.startswith("image/"):
+            return Response({"detail": "File không đúng định dạng ảnh."}, status=status.HTTP_400_BAD_REQUEST)
+
+        course_slug = lesson.course.slug
+        lesson_id = lesson.id
+        ext = os.path.splitext(file_obj.name)[1].lower() or ".png"
+        filename = f"{uuid.uuid4().hex}{ext}"
+        rel_path = (Path("courses") / course_slug / "lessons" / str(lesson_id) / filename).as_posix()
+
+        os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
+        fs = FileSystemStorage(location=settings.MEDIA_ROOT, base_url=settings.MEDIA_URL)
+        saved_path = fs.save(rel_path, file_obj)
+        url = request.build_absolute_uri(fs.url(saved_path).replace("\\", "/"))
+
+        return Response(
+            {
+                "url": url,
+                "path": saved_path,
+                "content_type": content_type,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=['get'], url_path='images')
+    def list_images(self, request):
+        course_param = (request.query_params.get("course") or "").strip()
+        try:
+            limit = int(request.query_params.get("limit")) if request.query_params.get("limit") else None
+        except ValueError:
+            limit = None
+        try:
+            offset = int(request.query_params.get("offset")) if request.query_params.get("offset") else 0
+        except ValueError:
+            offset = 0
+
+        course_slug_filter = None
+        if course_param:
+            if course_param.isdigit():
+                course = Course.objects.filter(id=int(course_param)).first()
+                course_slug_filter = course.slug if course else course_param
+            else:
+                course_slug_filter = course_param
+
+        base_dir = Path(settings.MEDIA_ROOT) / "courses"
+        items = []
+
+        if base_dir.exists():
+            for course_dir in base_dir.iterdir():
+                if not course_dir.is_dir():
+                    continue
+                course_slug = course_dir.name
+                if course_slug_filter and course_slug != course_slug_filter:
+                    continue
+                lessons_dir = course_dir / "lessons"
+                if not lessons_dir.exists():
+                    continue
+                for lesson_dir in lessons_dir.iterdir():
+                    if not lesson_dir.is_dir():
+                        continue
+                    lesson_id = lesson_dir.name
+                    for file in lesson_dir.iterdir():
+                        if not file.is_file():
+                            continue
+                        rel_path = file.relative_to(settings.MEDIA_ROOT).as_posix()
+                        url = request.build_absolute_uri(f"{settings.MEDIA_URL}{rel_path}")
+                        items.append(
+                            {
+                                "course_slug": course_slug,
+                                "lesson_id": lesson_id,
+                                "filename": file.name,
+                                "path": rel_path,
+                                "url": url,
+                            }
+                        )
+
+        total_count = len(items)
+        if offset:
+            items = items[offset:]
+        if limit is not None:
+            items = items[:limit]
+
+        course_slugs = {item["course_slug"] for item in items}
+        course_map = {
+            c.slug: {"id": c.id, "slug": c.slug, "title": c.title}
+            for c in Course.objects.filter(slug__in=course_slugs)
+        }
+
+        groups_map = {}
+        for item in items:
+            course_slug = item["course_slug"]
+            groups_map.setdefault(
+                course_slug,
+                {"course": course_map.get(course_slug) or {"slug": course_slug}, "items": []},
+            )
+            groups_map[course_slug]["items"].append(
+                {
+                    "url": item["url"],
+                    "path": item["path"],
+                    "filename": item["filename"],
+                    "lesson_id": item["lesson_id"],
+                }
+            )
+
+        groups = list(groups_map.values())
+        return Response(
+            {
+                "groups": groups,
+                "limit": limit,
+                "offset": offset,
+                "count": total_count,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=['delete'], url_path='images/delete')
+    def delete_image(self, request):
+        rel_path = (request.query_params.get("path") or "").strip().lstrip("/").replace("\\", "/")
+        if not rel_path:
+            return Response({"detail": "Thiếu tham số path."}, status=status.HTTP_400_BAD_REQUEST)
+
+        base_root = Path(settings.MEDIA_ROOT).resolve()
+        abs_path = (base_root / rel_path).resolve()
+        if not str(abs_path).startswith(str(base_root)):
+            return Response({"detail": "Đường dẫn không hợp lệ."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if abs_path.exists() and abs_path.is_file():
+            abs_path.unlink()
+
+            # Cleanup empty directories up to courses folder
+            parent = abs_path.parent
+            while parent != base_root and parent.exists() and not any(parent.iterdir()):
+                parent.rmdir()
+                parent = parent.parent
+
+        return Response({"success": True}, status=status.HTTP_200_OK)
 
     
 # View cho course admin

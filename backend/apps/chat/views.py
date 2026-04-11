@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Conversation, Message
+from django.db import transaction
 from .serializers import ChatSerializer
 from apps.ai.agent_service import run_agent
 from .memory_store import add_message, get_history, search_memory
@@ -85,6 +86,7 @@ def is_assessment_intent(message: str) -> bool:
 
 class ChatAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    max_history_messages = 30
 
     def get(self, request):
         # Không trả về lịch sử chat cho client
@@ -125,13 +127,25 @@ class ChatAPIView(APIView):
 
         # 2️⃣ Vector memory search (per user + session)
         memory_hits = []
-        history = []
         try:
             memory_hits = search_memory(request.user.id, session_id, user_message, k=5)
             add_message(request.user.id, session_id, "user", user_message)
-            history = get_history(request.user.id, session_id)
         except Exception:
-            history = [{"role": "user", "content": user_message}]
+            memory_hits = []
+
+        # 2.5️⃣ Build AI history from relational DB only (do not expose to user)
+        history = []
+        try:
+            db_messages = list(
+                Message.objects.filter(conversation=conversation)
+                .order_by("created_at")
+                .values("role", "content")
+            )
+            if db_messages:
+                history = db_messages[-self.max_history_messages :]
+        except Exception:
+            history = []
+        history.append({"role": "user", "content": user_message})
 
         # 3.5️⃣ Load User Profile
         user_test_result = getattr(request.user, 'test_result', None)
@@ -151,13 +165,29 @@ class ChatAPIView(APIView):
 
         # 4️⃣ Shortcut: assessment link
         if is_assessment_intent(user_message):
-            frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
-            assistant_reply = (
-                f"Bạn có thể làm bài test tại đây: {frontend_url}/assessment"
-            )
+            frontend_url = (os.getenv("FRONTEND_URL") or request.headers.get("Origin", "")).rstrip("/")
+            assessment_url = f"{frontend_url}/assessment" if frontend_url else "/assessment"
+            assistant_reply = f"Bạn có thể làm bài test tại đây: {assessment_url}"
         else:
             # 4️⃣ Call Agent
             assistant_reply = run_agent(history, user_profile)
+
+        # 4.5️⃣ Persist messages to relational DB for audit/history
+        try:
+            with transaction.atomic():
+                Message.objects.create(
+                    conversation=conversation,
+                    role="user",
+                    content=user_message,
+                )
+                Message.objects.create(
+                    conversation=conversation,
+                    role="assistant",
+                    content=assistant_reply,
+                )
+        except Exception:
+            # Do not block chat flow if logging fails
+            pass
 
         # 5️⃣ Save assistant message to vector DB
         try:

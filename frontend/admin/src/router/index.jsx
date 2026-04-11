@@ -6,6 +6,7 @@ import AdminLessonListPage from "../pages/AdminLessonListPage";
 import AdminLessonDetailPage from "../pages/AdminLessonDetailPage";
 import AdminLessonEditPage from "../pages/AdminLessonEditPage";
 import AdminLessonImagesPage from "../pages/AdminLessonImagesPage";
+import AdminInternalDocsPage from "../pages/AdminInternalDocsPage";
 import AdminCourseCreatePage from "../pages/AdminCourseCreatePage";
 import AdminCourseDetailPage from "../pages/AdminCourseDetailPage";
 import LoginPage from "../pages/LoginPage";
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
           {
             path: "lesson-images",
             element: <AdminLessonImagesPage />,
+          },
+          {
+            path: "internal-docs",
+            element: <AdminInternalDocsPage />,
           },
           {
             path: "courses/:id",

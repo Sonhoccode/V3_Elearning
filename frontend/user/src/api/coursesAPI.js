@@ -1,5 +1,5 @@
 // src/api/courses.api.js
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 export async function fetchCourses(opts) {
     const signal = opts && opts.signal ? opts.signal : undefined;

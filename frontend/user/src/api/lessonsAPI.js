@@ -1,4 +1,9 @@
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("access_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export async function fetchLessonsByCourse({ courseSlug, lang, signal } = {}) {
   if (!courseSlug) return [];
@@ -35,7 +40,7 @@ export async function fetchLessonProgress({ courseSlug, signal } = {}) {
     `${API_BASE}/api/v1/lessons/progress/?course=${courseSlug}`,
     {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...getAuthHeaders() },
       credentials: "include",
       signal,
     }
@@ -52,6 +57,7 @@ export async function markLessonCompleted({ courseSlug, lessonSlug }) {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      ...getAuthHeaders(),
     },
     credentials: "include",
     body: JSON.stringify({

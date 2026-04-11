@@ -1,8 +1,9 @@
 import os
 import re
+from typing import Optional
+import base64
+from typing import Optional
 import fitz # PyMuPDF
-from PIL import Image
-import io
 from supabase import create_client, Client
 
 from langchain_core.documents import Document
@@ -41,37 +42,62 @@ def clean_text(text: str) -> str:
 # Load & Split Documents
 # =========================
 
-def load_pdf_with_ocr(file_path: str):
+def load_pdf_with_ocr(file_path: Optional[str] = None, file_bytes: Optional[bytes] = None):
     """
     Chuyển PDF thành hình ảnh và dùng Gemini OCR xuất thành văn bản (chống scan, ảnh nhúng).
     """
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
     except ImportError as exc:
         raise RuntimeError(
-            "google-generativeai chưa được cài. Hãy cài package để dùng OCR."
+            "google-genai chưa được cài. Hãy cài package này để dùng OCR PDF."
         ) from exc
     api_key = os.getenv("GOOGLE_API_KEY")
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
     # Dùng flash model vì nó cực nhanh cho OCR
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model_name = "gemini-2.5-flash"
     
     docs = []
-    doc = fitz.open(file_path)
+    if file_bytes is not None:
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+    else:
+        doc = fitz.open(file_path)
     
     for page_num in range(len(doc)):
         try:
             page = doc.load_page(page_num)
             pix = page.get_pixmap(dpi=150) # Độ phân giải đủ để OCR tốt
             img_data = pix.tobytes("png")
-            image = Image.open(io.BytesIO(img_data))
-            
             # Gọi Gemini trích xuất văn bản
-            response = model.generate_content([
-                "Trích xuất TOÀN BỘ VĂN BẢN (Text) từ bức ảnh này chính xác như bản gốc. Nếu có bảng, hãy ghi lại rõ ràng. Trả về đúng văn bản tồn tại trong ảnh, tuyệt đối không thêm bình luận hay giải thích gì thêm.", 
-                image
-            ])
-            extracted_text = response.text.strip()
+            prompt = (
+                "Trích xuất TOÀN BỘ VĂN BẢN (Text) từ bức ảnh này chính xác như bản gốc. "
+                "Nếu có bảng, hãy ghi lại rõ ràng. Trả về đúng văn bản tồn tại trong ảnh, "
+                "tuyệt đối không thêm bình luận hay giải thích gì thêm."
+            )
+            parts = []
+            if hasattr(types, "Part") and hasattr(types.Part, "from_text"):
+                parts.append(types.Part.from_text(prompt))
+            else:
+                parts.append({"text": prompt})
+
+            if hasattr(types, "Part") and hasattr(types.Part, "from_bytes"):
+                parts.append(types.Part.from_bytes(data=img_data, mime_type="image/png"))
+            else:
+                parts.append(
+                    {
+                        "inline_data": {
+                            "mime_type": "image/png",
+                            "data": base64.b64encode(img_data).decode("utf-8"),
+                        }
+                    }
+                )
+
+            response = client.models.generate_content(
+                model=model_name,
+                contents=parts,
+            )
+            extracted_text = (response.text or "").strip()
             
             docs.append(
                 Document(
@@ -117,7 +143,14 @@ def load_and_split_documents():
 # Embedding Model
 # =========================
 
+def _ensure_hf_token():
+    token = os.getenv("HF_TOKEN")
+    if token and not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
+        os.environ["HUGGINGFACEHUB_API_TOKEN"] = token
+
+
 def get_embedding_model():
+    _ensure_hf_token()
     try:
         return HuggingFaceEmbeddings(
             model_name=EMBEDDING_MODEL_NAME,
@@ -172,7 +205,13 @@ def ingest_documents():
 # Ingest Custom Admin Text
 # =========================
 
-def ingest_custom_text(text: str, source_name: str = "Admin Input"):
+def ingest_custom_text(
+    text: str,
+    source_name: str = "Admin Input",
+    source_key: Optional[str] = None,
+    display_name: Optional[str] = None,
+    document_id: Optional[str] = None,
+):
     """Ingest custom text from the admin UI into Supabase"""
     supabase = get_supabase_client()
     embedding = get_embedding_model()
@@ -183,9 +222,16 @@ def ingest_custom_text(text: str, source_name: str = "Admin Input"):
         separators=["\n\n", "\n", ".", " ", ""],
     )
     
+    source_value = source_key or source_name
+    metadata = {"source": source_value}
+    if display_name:
+        metadata["display_name"] = display_name
+    if document_id:
+        metadata["document_id"] = document_id
+
     docs = text_splitter.create_documents(
-        [clean_text(text)], 
-        metadatas=[{"source": source_name}]
+        [clean_text(text)],
+        metadatas=[metadata],
     )
     
     print(f"Loaded Custom Text chunks: {len(docs)}")
@@ -210,28 +256,33 @@ def ingest_custom_text(text: str, source_name: str = "Admin Input"):
         supabase.table("documents").insert(rows[i:i + batch_size]).execute()
 
     print("✅ Custom Text ingest completed.")
+    return len(rows)
 
 
 # =========================
 # Ingest PDF
 # =========================
 
-def ingest_pdf(file_path: str):
+def ingest_pdf(
+    file_path: Optional[str] = None,
+    file_bytes: Optional[bytes] = None,
+    source_key: Optional[str] = None,
+    display_name: Optional[str] = None,
+    document_id: Optional[str] = None,
+):
     supabase = get_supabase_client()
     embedding = get_embedding_model()
 
-    # Check duplicate trước khi ingest
-    existing = supabase.table("documents") \
-        .select("id") \
-        .eq("metadata->>source", file_path) \
-        .execute()
-
-    if existing.data:
-        print("⚠ File already ingested, skipping...")
-        return
+    source_value = source_key or (file_path or "uploaded_pdf")
 
     # OCR Extract thay vì PyPDFLoader cũ (sẽ tóm được cả ảnh)
-    raw_docs = load_pdf_with_ocr(file_path)
+    raw_docs = load_pdf_with_ocr(file_path=file_path, file_bytes=file_bytes)
+    for doc in raw_docs:
+        doc.metadata["source"] = source_value
+        if display_name:
+            doc.metadata["display_name"] = display_name
+        if document_id:
+            doc.metadata["document_id"] = document_id
     
     # Chia nhỏ văn bản vì Raw OCR trả về nguyên trang
     text_splitter = RecursiveCharacterTextSplitter(
@@ -266,6 +317,7 @@ def ingest_pdf(file_path: str):
         supabase.table("documents").insert(rows[i:i + batch_size]).execute()
 
     print("✅ PDF ingest completed.")
+    return len(rows)
 
 
 # =========================
@@ -314,3 +366,19 @@ def similarity_search(query: str, k: int = 10):
         })
 
     return documents
+
+
+def delete_documents_by_source(source_key: str) -> int:
+    if not source_key:
+        return 0
+    supabase = get_supabase_client()
+    try:
+        result = (
+            supabase.table("documents")
+            .delete()
+            .eq("metadata->>source", source_key)
+            .execute()
+        )
+        return len(result.data or [])
+    except Exception:
+        return 0

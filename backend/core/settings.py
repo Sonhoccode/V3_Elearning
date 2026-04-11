@@ -10,7 +10,11 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     # Core (không dùng admin thì bỏ admin là OK)
@@ -137,16 +141,26 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 USER_FE_PORT = os.getenv("USER_FE_PORT", "5173")
 ADMIN_FE_PORT = os.getenv("ADMIN_FE_PORT", "5174")
 
-CORS_ALLOWED_ORIGINS = [
-    f"http://localhost:{USER_FE_PORT}",
-    f"http://localhost:{ADMIN_FE_PORT}",
-    "http://localhost:5175",  # Admin backup port
-]
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip()
+        for origin in cors_origins_env.split(",")
+        if origin.strip()
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        f"http://localhost:{USER_FE_PORT}",
+        f"http://localhost:{ADMIN_FE_PORT}",
+        "http://localhost:5175",  # Admin backup port
+    ]
 
 CORS_ALLOW_CREDENTIALS = True
 

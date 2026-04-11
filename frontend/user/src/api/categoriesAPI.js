@@ -1,6 +1,6 @@
 // // src/api/categories.api.js
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 
 function parseError(res, defaultMsg) {
     return res.json()

@@ -22,36 +22,36 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-custom flex flex-col items-center justify-center py-10 px-4">
-      <div className="w-full px-32 flex flex-col items-center gap-10">
+    <div className="flex flex-col items-center justify-center min-h-screen px-0 py-10 overflow-x-hidden bg-custom">
+      <div className="flex flex-col items-center w-full gap-10 px-4 sm:px-8 xl:px-32">
         {/* main */}
-        <div className="relative w-full h-96 shadow-xl rounded-sm z-10 ">
+        <div className="relative w-full min-h-[300px] lg:h-96 shadow-xl rounded-sm z-10 ">
           {/* welcome */}
-          <div className="bg-welcome flex flex-col justify-center text-center absolute rounded-lg inset-0 z-30 ">
-            <div className="left-[10%] bottom-0 absolute z-20">
+          <div className="absolute inset-0 z-30 flex flex-col justify-center p-6 text-center rounded-lg bg-welcome md:p-10">
+            <div className="left-[10%] bottom-0 absolute z-20 hidden lg:block">
               <img
                 src={welcome}
                 alt="Welcome Svg"
-                className=" w-auto h-80 ml-8"
+                className="w-auto ml-8 h-80"
               />
             </div>
-            <h1 className=" text-4xl font-extrabold mb-4 text-slate-900">
+            <h1 className="mb-4 text-3xl font-extrabold md:text-4xl text-slate-900 drop-shadow-md">
               {t("bg-welcome.title_welcome")}
             </h1>
-            <p className=" text-lg text-slate-700 px-2 w-fit mx-auto">
+            <p className="px-2 mx-auto text-base font-medium md:text-lg text-slate-800 lg:text-slate-700 w-fit drop-shadow-sm">
               {t("bg-welcome.content_welcome")}
             </p>
             <NavLink
               to="/roadmap"
               className="
-                mx-auto mt-6
+                mx-auto mt-6 md:mt-8
                 flex items-center justify-center
-                px-10 py-4
+                px-8 md:px-10 py-3 md:py-4
                 rounded-2xl
                 border border-white/30
                 button-custom bg-opacity-75
-                text-gray-700
-                font-semibold text-xl
+                text-gray-800
+                font-bold text-lg md:text-xl
                 shadow-lg
                 cursor-pointer
                 transition
@@ -64,7 +64,7 @@ export default function HomePage() {
         </div>
         {/* logo */}
         <div
-          className="logo-bg absolute right-0 top-[60%] -translate-y-1/2 "
+          className="logo-bg absolute right-0 top-[60%] -translate-y-1/2 hidden xl:block opacity-70 pointer-events-none"
         >
           <img
             src={logo}

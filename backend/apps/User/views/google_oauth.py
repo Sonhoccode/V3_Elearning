@@ -17,9 +17,9 @@ from apps.Common.models import User
 @permission_classes([AllowAny])
 def google_login(request):
     client_id = os.getenv("GOOGLE_CLIENT_ID")
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    BASE_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/google/callback/"
+    frontend_url = os.getenv("FRONTEND_URL") or request.headers.get("Origin", "")
+    backend_url = os.getenv("BACKEND_URL") or request.build_absolute_uri("/").rstrip("/")
+    redirect_uri = f"{backend_url}/api/user/oauth/google/callback/"
 
     if not client_id:
         return Response({"success": False, "error": "Missing GOOGLE_CLIENT_ID"}, status=500)
@@ -46,9 +46,9 @@ def google_callback(request):
 
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    BASE_BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
-    redirect_uri = f"{BASE_BACKEND_URL}/api/user/oauth/google/callback/"
+    frontend_url = os.getenv("FRONTEND_URL") or request.headers.get("Origin", "")
+    backend_url = os.getenv("BACKEND_URL") or request.build_absolute_uri("/").rstrip("/")
+    redirect_uri = f"{backend_url}/api/user/oauth/google/callback/"
 
     if not client_id or not client_secret:
         return Response({"success": False, "error": "Missing GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET"}, status=500)
@@ -123,7 +123,9 @@ def google_callback(request):
     access_jwt = str(refresh.access_token)
     refresh_jwt = str(refresh)
 
-    res = redirect(f"{frontend_url}/oauth/callback")  # FE route để hoàn tất
+    callback_base = frontend_url.rstrip("/")
+    callback_url = f"{callback_base}/oauth/callback" if callback_base else "/oauth/callback"
+    res = redirect(callback_url)  # FE route để hoàn tất
     res.set_cookie("access_token", access_jwt, httponly=True, secure=False, samesite="Lax", path="/")
     res.set_cookie("refresh_token", refresh_jwt, httponly=True, secure=False, samesite="Lax", path="/")
 
