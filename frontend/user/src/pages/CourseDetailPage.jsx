@@ -217,8 +217,8 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-32">
-      <div className="w-full max-w-full mx-auto flex">
+    <div className="min-h-screen bg-gray-50 px-0 sm:px-4 lg:px-8 xl:px-32">
+      <div className="w-full max-w-full mx-auto flex flex-col lg:flex-row relative">
         <LessonSidebar
           lessons={lessons}
           currentLessonSlug={lessonSlug}
