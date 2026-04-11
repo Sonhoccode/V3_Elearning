@@ -189,9 +189,9 @@ export default function CourseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-teal-500 rounded-full border-t-transparent animate-spin"></div>
           <p className="text-gray-600">{t("lesson.loading_lessons")}</p>
         </div>
       </div>
@@ -200,14 +200,14 @@ export default function CourseDetailPage() {
 
   if (coursesError || !course) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="flex items-center justify-center min-h-screen px-4">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          <h2 className="mb-4 text-2xl font-bold text-gray-800">
             {t("lesson.not_found_course")}
           </h2>
           <NavLink
             to="/"
-            className="px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+            className="px-6 py-3 text-white bg-teal-500 rounded-lg hover:bg-teal-600"
           >
             {t("lesson.back_home")}
           </NavLink>
@@ -217,8 +217,8 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-0 sm:px-4 lg:px-8 xl:px-32">
-      <div className="w-full max-w-full mx-auto flex flex-col lg:flex-row relative">
+    <div className="min-h-screen px-0 bg-gray-50 sm:px-4 lg:px-8 xl:px-32">
+      <div className="relative flex flex-col w-full max-w-full mx-auto lg:flex-row">
         <LessonSidebar
           lessons={lessons}
           currentLessonSlug={lessonSlug}
@@ -227,12 +227,12 @@ export default function CourseDetailPage() {
           completedSlugs={completedSlugs}
         />
 
-        <main className="flex-1 min-w-0 border-l border-gray-200 bg-white shadow-sm rounded-r-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-teal-500 to-blue-500 text-white p-8 transition-all duration-300">
+        <main className="flex-1 min-w-0 overflow-hidden bg-white border-l border-gray-200 rounded-r-lg shadow-sm">
+        <div className="p-8 text-white transition-all duration-300 bg-gradient-to-r from-teal-500 to-blue-500">
           <div>
             <NavLink
               to="/"
-              className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
+              className="inline-flex items-center mb-4 transition-colors text-white/80 hover:text-white"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -240,11 +240,11 @@ export default function CourseDetailPage() {
               {t("lesson.back_home")}
             </NavLink>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-4xl font-bold mb-2">
+              <h1 className="mb-2 text-4xl font-bold">
                   {currentLesson?.translation?.title || course.title}
               </h1>
               {lessonSlug && completedSlugs.includes(lessonSlug) && (
-                <span className="mb-2 inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-100">
+                <span className="inline-flex items-center px-3 py-1 mb-2 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-100">
                   {t("lesson.completed")}
                 </span>
               )}
@@ -255,17 +255,17 @@ export default function CourseDetailPage() {
         {/* Lesson Content */}
         <div className="p-8">
           {lessonLoading ? (
-            <div className="text-center py-12">
-              <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="py-12 text-center">
+              <div className="w-12 h-12 mx-auto mb-4 border-4 border-teal-500 rounded-full border-t-transparent animate-spin"></div>
               <p className="text-gray-600">{t("lesson.loading_lessons")}</p>
             </div>
           ) : currentLesson ? (
             <div>
               {/* Top Navigation */}
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex items-center justify-between mb-8">
                 <button
                   onClick={hasPrev ? handlePrev : () => navigate(`/courses/${slug}`)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                  className="flex items-center px-4 py-2 font-medium text-white transition-colors bg-teal-600 rounded hover:bg-teal-700"
                 >
                   ❮ {hasPrev ? t("lesson.previous") : t("lesson.home")}
                 </button>
@@ -288,10 +288,10 @@ export default function CourseDetailPage() {
                 }}
               />
 
-              <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
+              <div className="flex items-center justify-between pt-8 mt-12 border-t border-gray-200">
                 <button
                   onClick={hasPrev ? handlePrev : () => navigate(`/courses/${slug}`)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                  className="flex items-center px-4 py-2 font-medium text-white transition-colors bg-teal-600 rounded hover:bg-teal-700"
                 >
                   ❮ {hasPrev ? t("lesson.previous") : t("lesson.home")}
                 </button>
@@ -309,8 +309,8 @@ export default function CourseDetailPage() {
               <div ref={completionRef} className="h-2" aria-hidden="true" />
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg">
+            <div className="py-12 text-center">
+              <p className="text-lg text-gray-600">
                 {t("lesson.select_lesson_sidebar")}
               </p>
             </div>

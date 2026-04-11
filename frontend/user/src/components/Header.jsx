@@ -63,30 +63,30 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="site-header w-full flex flex-col items-center relative z-50">
+    <header className="relative z-50 flex flex-col items-center w-full site-header">
       <div className="w-full bg-white shadow-md">
         <div className="header-top w-[95%] md:w-[90%] max-w-screen-3xl mx-auto h-16 flex items-center justify-between overflow-visible">
           {/* Logo Area */}
-          <NavLink to="/" className="h-full flex items-center mr-0 lg:mr-4 flex-shrink-0" onClick={() => setMobileMenuOpen(false)}>
-            <img src={logo} alt="Logo" className="h-8 md:h-10 w-auto block" />
+          <NavLink to="/" className="flex items-center flex-shrink-0 h-full mr-0 lg:mr-4" onClick={() => setMobileMenuOpen(false)}>
+            <img src={logo} alt="Logo" className="block w-auto h-8 md:h-10" />
           </NavLink>
 
           {/* Desktop Nav Actions */}
-          <div className="hidden xl:flex items-center flex-1 justify-between ml-4">
+          <div className="items-center justify-between flex-1 hidden ml-4 xl:flex">
             {/* drop menu categories */}
-            <div className="flex items-center flex-wrap">
+            <div className="flex flex-wrap items-center">
               {categoriesLoading && (
                 <div className="flex items-center">
-                  <span className="text-base md:text-lg flex items-center gap-1 px-2 md:px-4 py-4 text-gray-700 font-bold">
+                  <span className="flex items-center gap-1 px-2 py-4 text-base font-bold text-gray-700 md:text-lg md:px-4">
                     Language <ArrowDropDownIcon />
                   </span>
-                  <span className="text-base md:text-lg flex items-center gap-1 px-2 md:px-4 py-4 text-gray-700 font-bold">
+                  <span className="flex items-center gap-1 px-2 py-4 text-base font-bold text-gray-700 md:text-lg md:px-4">
                     Framework <ArrowDropDownIcon />
                   </span>
                 </div>
               )}
               {categoriesError && (
-                <div className="text-red-500 text-sm px-4">
+                <div className="px-4 text-sm text-red-500">
                   {t("header.system_error", "Hệ thống lỗi")}
                 </div>
               )}
@@ -159,11 +159,11 @@ export default function Header() {
           </div>
 
           {/* Mobile Hamburger Button */}
-          <div className="xl:hidden flex items-center gap-4">
+          <div className="flex items-center gap-4 xl:hidden">
              <div className="scale-90"><DropLanguage /></div>
              <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg bg-teal-50 text-teal-600 hover:bg-teal-100 transition-colors"
+                className="p-2 text-teal-600 transition-colors rounded-lg bg-teal-50 hover:bg-teal-100"
                 aria-label="Toggle mobile menu"
              >
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
@@ -178,18 +178,18 @@ export default function Header() {
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-         <div className="p-6 flex flex-col gap-6">
-            <div className="border-b border-gray-100 pb-4">
-               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Danh mục</h3>
+         <div className="flex flex-col gap-6 p-6">
+            <div className="pb-4 border-b border-gray-100">
+               <h3 className="mb-4 text-sm font-bold tracking-wider text-gray-500 uppercase">Danh mục</h3>
                <div className="flex flex-col gap-2">
                  {!categoriesLoading && !categoriesError && categories.map((cat) => (
-                    <div key={cat.id} className="flex flex-col border-b border-gray-50 pb-2">
-                       <button onClick={() => toggle(cat.slug)} className="flex justify-between items-center w-full py-2 font-bold text-gray-700 text-left">
+                    <div key={cat.id} className="flex flex-col pb-2 border-b border-gray-50">
+                       <button onClick={() => toggle(cat.slug)} className="flex items-center justify-between w-full py-2 font-bold text-left text-gray-700">
                           {cat.name}
                           <ArrowDropDownIcon className={openSlug === cat.slug ? "rotate-180" : ""} />
                        </button>
                        {openSlug === cat.slug && (
-                         <div className="flex flex-col pl-4 gap-2 mt-2">
+                         <div className="flex flex-col gap-2 pl-4 mt-2">
                             {cat.courses?.map((item) => (
                                <NavLink key={item.id} to={`/courses/${item.slug}`} onClick={() => setMobileMenuOpen(false)} className="py-2 text-gray-600">
                                  {item.title}
@@ -201,12 +201,12 @@ export default function Header() {
                  ))}
                  
                  <div className="flex flex-col pt-2">
-                    <button onClick={() => toggle("more")} className="flex justify-between items-center w-full py-2 font-bold text-gray-700 text-left">
+                    <button onClick={() => toggle("more")} className="flex items-center justify-between w-full py-2 font-bold text-left text-gray-700">
                         {t("header.more", "Thêm")}
                         <ArrowDropDownIcon className={openSlug === "more" ? "rotate-180" : ""} />
                     </button>
                     {openSlug === "more" && (
-                         <div className="flex flex-col pl-4 gap-2 mt-2">
+                         <div className="flex flex-col gap-2 pl-4 mt-2">
                             <NavLink to="/classes" onClick={() => setMobileMenuOpen(false)} className="py-2 text-gray-600">
                                {t("header.classes", "Lớp học")}
                             </NavLink>
@@ -219,8 +219,8 @@ export default function Header() {
                </div>
             </div>
 
-            <div className="border-b border-gray-100 pb-4">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Tài khoản</h3>
+            <div className="pb-4 border-b border-gray-100">
+              <h3 className="mb-4 text-sm font-bold tracking-wider text-gray-500 uppercase">Tài khoản</h3>
               <div onClick={() => setMobileMenuOpen(false)}>
                  <AuthItems />
               </div>
@@ -229,11 +229,11 @@ export default function Header() {
       </div>
 
       {/* Header Bottom (Desktop Courses Shortcut) - Hidden on Mobile */}
-      <div className="w-full h-14 bg-gray-100 hidden xl:flex items-center justify-center border-t border-gray-200">
+      <div className="items-center justify-center hidden w-full bg-gray-100 border-t border-gray-200 h-14 xl:flex">
         {coursesLoading ? (
-           <span className="loader scale-50"></span>
+           <span className="scale-50 loader"></span>
         ) : coursesError ? (
-           <div className="text-red-500 text-sm">{t("header.system_error")}</div>
+           <div className="text-sm text-red-500">{t("header.system_error")}</div>
         ) : (
           <nav className="flex flex-wrap justify-center overflow-hidden">
             {courses?.length > 0 && courses.map((course) => (

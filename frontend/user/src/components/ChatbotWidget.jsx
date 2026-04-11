@@ -128,9 +128,9 @@ export default function ChatbotWidget() {
           {children}
         </a>
       ),
-      p: ({ children }) => <p className="whitespace-pre-wrap leading-relaxed">{children}</p>,
+      p: ({ children }) => <p className="leading-relaxed whitespace-pre-wrap">{children}</p>,
       pre: ({ children, ...props }) => (
-        <pre className="chat-pre rounded-lg bg-slate-900 border border-slate-700 p-3 my-3 text-slate-100 overflow-x-auto" {...props}>
+        <pre className="p-3 my-3 overflow-x-auto border rounded-lg chat-pre bg-slate-900 border-slate-700 text-slate-100" {...props}>
           {children}
         </pre>
       ),
@@ -152,8 +152,8 @@ export default function ChatbotWidget() {
           </code>
         );
       },
-      ul: ({ children }) => <ul className="list-disc pl-5">{children}</ul>,
-      ol: ({ children }) => <ol className="list-decimal pl-5">{children}</ol>,
+      ul: ({ children }) => <ul className="pl-5 list-disc">{children}</ul>,
+      ol: ({ children }) => <ol className="pl-5 list-decimal">{children}</ol>,
       li: ({ children }) => <li className="mb-1">{children}</li>,
     }),
     []
@@ -219,27 +219,27 @@ export default function ChatbotWidget() {
   };
 
   return (
-    <div ref={widgetRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div ref={widgetRef} className="fixed z-50 flex flex-col items-end gap-3 bottom-6 right-6">
       <div 
         className={`w-[92vw] max-w-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all duration-300 origin-bottom-right ${
           open ? "scale-100 opacity-100" : "scale-50 opacity-0 pointer-events-none absolute bottom-16 right-0"
         }`}
       >
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
             <div className="text-sm font-semibold text-slate-800">
               {t("chatbot.title", "Trợ lý học tập")}
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-md px-2 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100"
+              className="px-2 py-1 text-xs font-semibold rounded-md text-slate-500 hover:bg-slate-100"
               aria-label="Close chatbot"
             >
               {t("chatbot.close", "Đóng")}
             </button>
           </div>
           <div className="h-[70vh] max-h-[520px] space-y-3 overflow-y-auto px-4 py-3 text-sm text-slate-600">
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+            <div className="px-3 py-2 text-xs bg-white border rounded-lg border-slate-200 text-slate-600">
               {t("chatbot.assessment_prompt", "Muốn đánh giá năng lực?")}{" "}
               <Link to="/assessment" className="font-semibold text-teal-600 underline">
                 {t("chatbot.start_test", "Bắt đầu bài test")}
@@ -263,7 +263,7 @@ export default function ChatbotWidget() {
                     {isUser ? (
                       <span className="whitespace-pre-wrap">{msg.content}</span>
                     ) : (
-                      <div className="chat-prose prose prose-sm max-w-none">
+                      <div className="prose-sm prose chat-prose max-w-none">
                         <ReactMarkdown
                           components={markdownComponents}
                           remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -278,18 +278,18 @@ export default function ChatbotWidget() {
             })}
             {loading && (
               <div className="flex justify-start">
-                <div className="rounded-lg bg-slate-50 px-3 py-2 text-slate-500">
+                <div className="px-3 py-2 rounded-lg bg-slate-50 text-slate-500">
                   {t("chatbot.replying", "Đang trả lời...")}
                 </div>
               </div>
             )}
             {error && (
-              <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+              <div className="px-3 py-2 text-xs text-red-600 rounded-lg bg-red-50">
                 {error}
               </div>
             )}
             {!isAuthenticated && (
-              <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              <div className="px-3 py-2 text-xs rounded-lg bg-amber-50 text-amber-700">
                 {t("chatbot.need_to", "Bạn cần")}{" "}
                 <Link to="/login" className="font-semibold underline">
                   {t("chatbot.login", "đăng nhập")}
@@ -299,8 +299,8 @@ export default function ChatbotWidget() {
             )}
             <div ref={endRef} />
           </div>
-          <div className="border-t border-slate-100 px-4 py-3">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500 transition-all">
+          <div className="px-4 py-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 px-3 py-2 transition-all bg-white border shadow-sm rounded-xl border-slate-200 focus-within:border-teal-500 focus-within:ring-1 focus-within:ring-teal-500">
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -326,7 +326,7 @@ export default function ChatbotWidget() {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg hover:bg-teal-700"
+        className="flex items-center justify-center w-12 h-12 text-white bg-teal-600 rounded-full shadow-lg hover:bg-teal-700"
         aria-label="Toggle chatbot"
       >
         <svg
@@ -336,7 +336,7 @@ export default function ChatbotWidget() {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="h-6 w-6"
+          className="w-6 h-6"
         >
           <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.6-.8L3 21l1.9-5.4a8.4 8.4 0 0 1-1-4.1 8.4 8.4 0 0 1 8.4-8.4 8.4 8.4 0 0 1 8.7 8.4Z" />
         </svg>

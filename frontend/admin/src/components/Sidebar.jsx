@@ -20,7 +20,7 @@ export default function Sidebar() {
         <h2 className="text-2xl font-bold gradient-text">Admin Panel</h2>
       </div>
       
-      <div className="flex-1 overflow-y-auto py-6 space-y-2 px-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <div className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         <NavLink
             to="/"
             className={({ isActive }) =>
@@ -114,7 +114,7 @@ export default function Sidebar() {
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 text-red-600 hover:text-red-700 hover:bg-red-50"
+          className="w-full px-4 py-2 text-sm font-medium text-red-600 transition-all duration-300 rounded-lg hover:text-red-700 hover:bg-red-50"
         >
           Logout
         </button>
