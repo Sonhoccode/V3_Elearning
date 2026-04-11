@@ -18,20 +18,20 @@ const renderList = (excluderID) => {
     const courses = categories?.filter((category) => category.id !== excluderID).flatMap(category => category.courses) ?? [];
 
     return (
-        <div className="p-1 mt-10 grid grid-cols-3 justify-evenly gap-20">
+        <div className="p-1 mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-evenly gap-6 md:gap-10 lg:gap-16 xl:gap-20">
             {courses.map((course, index) => {
                 const ItemColor = ORDERED_COLORS[index % ORDERED_COLORS.length];
                 return (
                     <div
                         key={course.id}
-                        className="p-10 flex flex-col gap-10 justify-center items-center rounded-lg"
+                        className="p-6 md:p-10 flex flex-col gap-6 md:gap-10 justify-center items-center rounded-lg"
                         data-aos = "fade-up"
                         data-aos-duration="300"
                         data-aos-offset="0"
                         data-aos-easing="ease-in-sine"
                         style={{ backgroundColor: ItemColor }}
                     >
-                        <div className="font-bold text-6xl">
+                        <div className="font-bold text-3xl md:text-4xl lg:text-3xl xl:text-5xl text-center break-words max-w-full">
                             {course.title}
                         </div>    
                         <NavLink

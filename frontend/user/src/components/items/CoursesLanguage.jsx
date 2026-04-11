@@ -18,20 +18,20 @@ const renderList = (categoryId) => {
     const courses = categories?.find((category) => category.id === categoryId)?.courses ?? [];
 
     return (
-        <div className="p-1 grid grid-cols-2 justify-evenly gap-20">
+        <div className="p-1 grid grid-cols-1 lg:grid-cols-2 justify-evenly gap-6 md:gap-10 lg:gap-20">
             {courses.map((course, index) => {
                 const ItemColor = ORDERED_COLORS[index % ORDERED_COLORS.length];
                 return (
                     <div
                         key={course.id}
-                        className="p-10 flex flex-col gap-10 justify-center items-center rounded-lg"
+                        className="p-6 md:p-10 flex flex-col gap-6 md:gap-10 justify-center items-center rounded-lg"
                         data-aos = "fade-up"
                         data-aos-duration="300"
                         data-aos-offset="0"
                         data-aos-easing="ease-in-sine"
                         style={{ backgroundColor: ItemColor }}
                     >
-                        <div className="font-bold text-6xl">
+                        <div className="font-bold text-3xl md:text-5xl lg:text-4xl xl:text-6xl text-center break-words max-w-full">
                             {course.title}
                         </div>    
                         <NavLink
