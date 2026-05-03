@@ -2,7 +2,7 @@ app = "your-admin-app"
 primary_region = "sin"
 
 [build]
-  dockerfile = "frontend/admin/Dockerfile"
+  dockerfile = "../../../frontend/admin/Dockerfile"
   [build.args]
     VITE_API_BASE_URL = "https://your-backend-app.fly.dev"
 
