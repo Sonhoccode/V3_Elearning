@@ -8,9 +8,9 @@ This repo is prepared for 3 separate Fly apps:
 
 ## Files
 
-- `deploy/fly/backend/fly.toml`
-- `deploy/fly/user/fly.toml`
-- `deploy/fly/admin/fly.toml`
+- `backend/fly/backend/fly.toml`
+- `backend/fly/user/fly.toml`
+- `backend/fly/admin/fly.toml`
 - `backend/.env.fly.example`
 - `frontend/user/.env.fly.example`
 - `frontend/admin/.env.fly.example`
