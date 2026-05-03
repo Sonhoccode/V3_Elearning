@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql="""
-            create extension if not exists vector;
+            create extension if not exists vector with schema extensions;
 
             create table if not exists chat_memory (
               id bigserial primary key,
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
               session_id text not null,
               role text not null,
               content text not null,
-              embedding vector not null,
+              embedding extensions.vector not null,
               created_at timestamptz default now()
             );
 
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
               on chat_memory (user_id, session_id);
 
             create or replace function match_chat_memory(
-              query_embedding vector,
+              query_embedding extensions.vector,
               match_count int,
               filter jsonb
             )
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
             $$;
             """,
             reverse_sql="""
-            drop function if exists match_chat_memory(vector, int, jsonb);
+            drop function if exists match_chat_memory(extensions.vector, int, jsonb);
             drop table if exists chat_memory;
             """,
         ),
