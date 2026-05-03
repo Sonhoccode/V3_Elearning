@@ -23,4 +23,12 @@ primary_region = "sin"
     path = "/health/"
 
 [deploy]
-  release_command = "python manage.py migrate --noinput"
+  release_command = "python manage.py migrate --skip-checks --noinput"
+
+  [deploy.release_command_vm]
+    size = "shared-cpu-1x"
+    memory = "1gb"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
