@@ -118,9 +118,22 @@ def github_callback(request):
     callback_base = frontend_url.rstrip("/")
     callback_url = f"{callback_base}/oauth/callback" if callback_base else "/oauth/callback"
     res = redirect(callback_url)  # FE route để hoàn tất
-    res.set_cookie("access_token", access_jwt, httponly=True, secure=False, samesite="Lax", path="/")
-    res.set_cookie("refresh_token", refresh_jwt, httponly=True, secure=False, samesite="Lax", path="/")
+    res.set_cookie(
+        "access_token",
+        access_jwt,
+        httponly=True,
+        secure=settings.SESSION_COOKIE_SECURE,
+        samesite=settings.SESSION_COOKIE_SAMESITE,
+        path="/",
+    )
+    res.set_cookie(
+        "refresh_token",
+        refresh_jwt,
+        httponly=True,
+        secure=settings.SESSION_COOKIE_SECURE,
+        samesite=settings.SESSION_COOKIE_SAMESITE,
+        path="/",
+    )
 
     return res
-
 
